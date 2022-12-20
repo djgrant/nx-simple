@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "name": "nx-simple",
+  "type": "commonjs",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "executors": "./executors.json"
+}
