@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "version": 2,
   "cli": "nx",
-  "title": "build-node-mts Executor",
+  "title": "build-esm Executor",
   "description": "Builds node.ts ESM packages",
   "type": "object",
   "additionalProperties": false,
@@ -14,23 +14,23 @@
         "$ref": "#/definitions/assetPattern"
       }
     },
+    "distribution": {
+      "type": "string",
+      "description": "",
+      "enum": ["internal", "external"]
+    },
     "entry": {
       "type": "string",
       "description": "Package entry module",
       "default": "index.ts"
     },
-    "esbuild": {
-      "type": "object",
-      "description": "Additional options to pass to esbuild. See https://esbuild.github.io/api/.",
-      "additionalProperties": true
-    },
-    "strategy": {
+    "target": {
       "type": "string",
-      "description": "",
-      "enum": ["internal", "external"]
+      "description": "The target environment",
+      "default": "es2020"
     }
   },
-  "required": ["strategy"],
+  "required": ["distribution"],
   "definitions": {
     "assetPattern": {
       "oneOf": [
