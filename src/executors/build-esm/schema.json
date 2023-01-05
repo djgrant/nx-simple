@@ -24,9 +24,9 @@
       "description": "Package entry module",
       "default": "index.ts"
     },
-    "target": {
+    "targetRuntime": {
       "type": "string",
-      "description": "The target environment",
+      "description": "The target runtime environment",
       "default": "es2020"
     }
   },

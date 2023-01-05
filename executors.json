@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "executors": {
     "build-esm": {
-      "implementation": "./src/executors/build-esm/executor",
+      "implementation": "./dist/executors/build-esm/executor",
       "schema": "./src/executors/build-esm/schema.json",
       "description": "Builds TypeScript packages"
     }

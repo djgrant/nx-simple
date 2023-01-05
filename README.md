@@ -53,12 +53,12 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 
 ### Options
 
-| Param          | Type                     | Default    | Description                           |
-| -------------- | ------------------------ | ---------- | ------------------------------------- |
-| `distribution` | `internal` / `external`  | required   | the distribution strategy             |
-| `entry`        | `string`                 | `index.ts` | the package's entry module            |
-| `assets`       | `string[]`               | `[]`       | any files to copy to the build folder |
-| `target`       | `es5` / `es6` / `esYYYY` | `es2020`   | the target JavaScript environment     |
+| Param           | Type                         | Default    | Description                           |
+| --------------- | ---------------------------- | ---------- | ------------------------------------- |
+| `distribution`  | `"internal" \| "external"`   | required   | the distribution strategy             |
+| `entry`         | `string`                     | `index.ts` | the package's entry module            |
+| `assets`        | `string[]`                   | `[]`       | any files to copy to the build folder |
+| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `es2020`   | the target JavaScript environment     |
 
 ### Effects
 
@@ -80,8 +80,10 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 - Adds detected dependencies to `package.json`
 - Adds `main` and `module` fields to `package.json`
 - Copies any README, LICENSE, LICENCE files
-- Type checks using nearest `tsconfig.json`
+- Type checks project using nearest `tsconfig.json`
+- Type checks any included packages
 - Generates type definition (`.d.ts`) files
+- WIP: Detects, packages and includes non-publishable dependencies
 
 ### Conventions
 
