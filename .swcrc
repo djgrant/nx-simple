@@ -1,0 +1,16 @@
+{
+  "jsc": {
+    "parser": {
+      "syntax": "typescript"
+    },
+    "target": "es2022",
+    "baseUrl": "./src",
+    "paths": {
+      "executors/*": ["executors/*"],
+      "utils/*": ["utils/*"]
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  }
+}

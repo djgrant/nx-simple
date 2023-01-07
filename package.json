@@ -6,6 +6,6 @@
   "main": "dist/index.js",
   "executors": "./executors.json",
   "scripts": {
-    "build": "swc src -d dist -C jsc.target=es2022 -C module.type=commonjs"
+    "build": "swc src -d dist"
   }
 }

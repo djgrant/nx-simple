@@ -1,9 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "./",
-    "moduleResolution": "Node16",
-    "module": "CommonJS"
-  },
+  "compilerOptions": { "baseUrl": "src" },
   "include": ["src/**/*"]
 }

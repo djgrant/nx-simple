@@ -8,17 +8,21 @@ The plugin aims to achieve a predictable and cohesive development experience by 
 
 1. Compatibility with other tools in the ecosystem
 1. Transparency about what is happening under-the-hood
-1. Implicit contracts (conventions) are identified and clearly documented
+1. Implicit contracts are identified and clearly documented
 1. Any combination of options provide a working state
 1. Well-defined goals can be achieved using a "strategy" option, which encapsulates a set of functions
 
 # Executors
 
-## build-esm
+## build-package
 
-Builds TypeScript ESM packages. The executor creates builds for internal use within a monorepo, or for publication to an NPM registry.
+Compiles and packages TypeScript projects for internal use within a monorepo, or for publication to an NPM registry.
 
-> ⚠️ This executor does not bundle modules. Although there are use-cases for bundling, both for browsers and node.js, doing so means either not getting access to all ES module features (e.g. `import.meta`), or setting up extra transpilation steps, which is out-of-scope for this executor.
+A package is a directory (often found in node_modules) that contains one or more modules, one or more entry points, and a package.json. Building to this standard structure ensures that the compilations steps remain simple, and that other tools in the ecosystem can easily resolve and import the built package.
+
+This executor does not bundle modules (for a few [reasons](#bundling)) but the packages produced by it can be consumed by your favourite bundler without making any modifications to how it works.
+
+> ⚠️ Currently the executor only supports ESM projects. This may not change.
 
 ### Usage
 
@@ -36,13 +40,13 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 {
   "targets": {
     "build": {
-      "executor": "nx-simple:build-esm",
+      "executor": "nx-simple:build-package",
       "options": {
         "distribution": "internal"
       }
     },
     "prepublish": {
-      "executor": "nx-simple:build-esm",
+      "executor": "nx-simple:build-package",
       "options": {
         "distribution": "external"
       }
@@ -85,7 +89,7 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 - Generates type definition (`.d.ts`) files
 - WIP: Detects, packages and includes non-publishable dependencies
 
-### Conventions
+### Contracts
 
 <details>
 <summary><strong>1. The package is an NPM workspace</strong></summary>
@@ -136,7 +140,7 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 {
   "targets": {
     "build": {
-      "executor": "nx-simple:build-esm",
+      "executor": "nx-simple:build-package",
       "options": {
         "entry": "src/index.ts"
       }
@@ -222,6 +226,12 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 
 </details>
 
+Todo:
+
+- Update: correct destinations for cache outputs
+- Add: how the plugin determines if a project is buildable and publishable
+- Add: package.json is required for projects that build with nx-simple (needs to be enforced in code too)
+
 ### Compatibility
 
 | Tooling                                             | Setup                               | Explanation                                                                                                            |
@@ -234,3 +244,16 @@ Builds TypeScript ESM packages. The executor creates builds for internal use wit
 #### Caveats
 
 - Publishing tools will probably assume that the package they version-bump is also the package to be released. This is an unavoidable consequence of this plugin's setup (to avoid package.json conflicts, the executor builds the publishable package to `{workspaceRoot}/dist`).
+
+### Bundling
+
+There's a few reasons why this executor does not produce bundles:
+
+1. Now that ES modules are implemented natively in all runtimes, a good starting point is not to bundle
+2. Bundling adds extra complexity, both in the implementation and for the user, when determining things like how to handle rewriting `import.meta.url`
+3. There are great tools out there for bundling when it's required, and the packages that this executor produces can be consumed by them as standard node modules
+
+### Todo
+
+- Accept compatible SWC options https://swc.rs/docs/usage/cli#options
+- Consider compilation of non-ESM projects/files

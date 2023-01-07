@@ -2,11 +2,9 @@ import ts from "typescript";
 
 export function generateTsDefinitions(
   entry: string,
-  projectDir: string,
-  publishDir: string
+  publishDir: string,
+  tsConfig: ts.ParsedCommandLine | null
 ) {
-  const tsConfig = getTsConfig(projectDir);
-
   const program = ts.createProgram({
     rootNames: [entry],
     options: {
