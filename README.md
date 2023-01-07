@@ -68,7 +68,7 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 
 - The parent directory of `entry` is considered the source directory. All TypeScript files under this directory will be compiled.
 - If present, the SWC compiler will use `{projectRoot}.swcrc` as its base config
-- TODO: creates path mappings based on tsconfig baseUrl & paths
+- Creates path mappings based on tsconfig `baseUrl` & `paths`
 
 #### `distribution: internal`
 

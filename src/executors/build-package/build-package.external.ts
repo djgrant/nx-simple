@@ -1,3 +1,4 @@
+import path from "node:path";
 import fse from "fs-extra";
 import { getProjectDependencies } from "utils/nx.deps";
 import { runTask } from "utils/nx.tasks";
@@ -27,7 +28,6 @@ export async function runExternalExecutor(
   );
 
   // 2. Compile current layer
-  // Todo does this need be inlined because of path mapping?
   console.log(`Building layer for ${context.projectName}...`);
 
   await runTask({
@@ -51,24 +51,27 @@ export async function runExternalExecutor(
       for (const dep of deps.unpublished) {
         console.log(`Building layer for dependency ${dep.name}...`);
 
-        const task = runTask({
-          project: dep.name,
-          target: "build", // todo find name of target – prefer distribution=external
-          cwd: context.root,
-          overrides: {
-            distribution: "layer",
-            targetRuntime: options.targetRuntime,
-          },
-          logger: context.isVerbose ? console.log : undefined,
-        }).then(async () => {
-          // 3a. Copy layer to publishable distribution
-          await fse.copy(
-            `${cfg.layersDir}/${dep.name}`,
-            `${tmpOutDir}/layers/${dep.name}`
-          );
-        });
+        const task = async () => {
+          await runTask({
+            project: dep.name,
+            target: "build", // todo find name of target – prefer distribution=external
+            cwd: context.root,
+            overrides: {
+              distribution: "layer",
+              targetRuntime: options.targetRuntime,
+            },
+            logger: context.isVerbose ? console.log : undefined,
+          });
 
-        tasks.push(task);
+          // 3a. Copy layer to publishable distribution
+          for (const fmt of ["cjs", "esm"]) {
+            const src = path.join(cfg.layersDir, dep.name);
+            const dest = path.join(tmpOutDir, fmt, "node_modules", dep.name);
+            await fse.copy(src, dest);
+          }
+        };
+
+        tasks.push(task());
       }
 
       await Promise.all(tasks);
