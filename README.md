@@ -20,7 +20,7 @@ Compiles and packages TypeScript projects for internal use within a monorepo, or
 
 A package is a directory (often found in node_modules) that contains one or more modules, one or more entry points, and a package.json. Building to this standard structure ensures that the compilations steps remain simple, and that other tools in the ecosystem can easily resolve and import the built package.
 
-This executor does not bundle modules (for a few [reasons](#bundling)) but the packages produced by it can be consumed by your favourite bundler without making any modifications to how it works.
+This executor does not bundle modules for a few [reasons](#bundling), but the packages produced by it can be consumed by your favourite bundlers without making any modifications to how they work.
 
 > ⚠️ Currently the executor only supports ESM projects. This may not change.
 
@@ -87,7 +87,7 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 - Type checks project using nearest `tsconfig.json`
 - Type checks any included packages
 - Generates type definition (`.d.ts`) files
-- WIP: Detects, packages and includes non-publishable dependencies
+- Detects, builds and packages non-publishable dependencies in a local node_modules directory
 
 ### Contracts
 
@@ -95,9 +95,9 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>1. The package is an NPM workspace</strong></summary>
 <br />
 
-> **Why?** Allow the package to be imported by its package name, and resolvable by any tool in the ecosystem.
+**Why?** Allow the package to be imported by its package name, and resolvable by any tool in the ecosystem.
 
-> **How?** In the root `package.json`, include the package within the `workspaces` field.
+**How?** In the root `package.json`, include the package within the `workspaces` field.
 
 ```jsonc
 // root package.json
@@ -113,9 +113,9 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>2. The `types` field points to the entry module</strong></summary>
 <br />
 
-> **Why?** In development, features like "Go to definition" should navigate to source files, not the compiled output.
+**Why?** In development, features like "Go to definition" should navigate to source files, not the compiled output.
 
-> **How?** Set `types` to the entry module. Note: this works even if it's a regular TypeScript file! Publishable packages (built using the `external` strategy) will have this field replaced with the path of the generated `.d.ts` file).
+**How?** Set `types` to the entry module. Note: this works even if it's a regular TypeScript file! Publishable packages (built using the `external` strategy) will have this field replaced with the path of the generated `.d.ts` file).
 
 ```jsonc
 // package.json
@@ -131,9 +131,9 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>3. The `main` field points to the dist folder</strong></summary>
 <br />
 
-> **Why?** Build tools that encounter this package should resolve imports to the compiled code.
+**Why?** Build tools that encounter this package should resolve imports to the compiled code.
 
-> **How?** Set `main` to `dist/${entryModuleName}.js`. Note: the path to the entry module filename is not required.
+**How?** Set `main` to `dist/${entryModuleName}.js`. Note: the path to the entry module filename is not required.
 
 ```jsonc
 // project.json
@@ -162,7 +162,7 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>4. The `type` field is `module`</strong></summary>
 <br />
 
-> **Why?** Using ESM comes with a set of caveats; interoperating between ESM and CJS can get quite complicated. To keep things simple, this executor focuses just on ESM packages.
+**Why?** Interoperating between ESM and CJS can get messy. To keep things simple, this executor focuses just on ESM packages.
 
 > How? Set `type` to `module`
 
@@ -179,9 +179,9 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>5. Nx `inputs` and `outputs` are set</strong></summary>
 <br />
 
-> **Why?** Nx needs to know where different executors write their artefacts.
+**Why?** Nx needs to know where build-package executor writes its artefacts.
 
-> **How?** Assuming internal packages are created using a `build` target, and external using a `prepublish` target, you would need the following configuration:
+**How?** Assuming internal packages are created using a `build` target, and external using a `prepublish` target, you would need the following configuration:
 
 ```jsonc
 // nx.json
@@ -192,12 +192,19 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
   "targetDefaults": {
     "build": {
       "inputs": ["default", "^default"],
-      "outputs": ["{projectRoot}/dist"],
+      "outputs": [
+        "{projectRoot}/dist",
+        "{workspaceRoot}/dist/{projectName}",
+        "{workspaceRoot}/dist/.nxsimple/{projectName}"
+      ],
       "dependsOn": ["^build"]
     },
     "prepublish": {
       "inputs": ["default", "^default"],
-      "outputs": ["{workspaceRoot}/dist"]
+      "outputs": [
+        "{workspaceRoot}/dist/{projectName}",
+        "{workspaceRoot}/dist/.nxsimple/{projectName}"
+      ]
     }
   }
 }
@@ -209,9 +216,9 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 <summary><strong>6. Nx is configured to analyse source files</strong></summary>
 <br />
 
-> **Why?** When using both a single-version policy, and creating external packages, Nx needs configured to detect dependencies within modules.
+**Why?** When using a single-version policy (i.e. dependencies are declared in root package.json), Nx needs to be configured to detect dependencies within modules.
 
-> **How?** Enable the `analyzeSourceFiles`.
+**How?** Enable the `analyzeSourceFiles`. Unless you have a Lerna repo, this will be on by default.
 
 ```jsonc
 // nx.json
@@ -226,11 +233,57 @@ This executor does not bundle modules (for a few [reasons](#bundling)) but the p
 
 </details>
 
-Todo:
+<details>
+<summary><strong>7. Nx is configured to detect dependencies</strong></summary>
+<br />
 
-- Update: correct destinations for cache outputs
-- Add: how the plugin determines if a project is buildable and publishable
-- Add: package.json is required for projects that build with nx-simple (needs to be enforced in code too)
+**Why?** When analysing source files, Nx needs to be told how to resolve dependencies.
+
+**How?** Add path mappings to tsconfig.base.json.
+
+```jsonc
+// tsconfig.base.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@scope/mylib/*": "packages/mylib/*"
+    }
+  }
+}
+```
+
+Note: that these are only required to build the Nx graph. When NPM workspaces is configured, the TypeScript compiler will be able to get intellisense by resolving imports to your local packages in node_modules.
+
+</details>
+
+<details>
+<summary><strong>7. Declare publishable packages</strong></summary>
+<br />
+
+**Why?** Nx-simple needs to know if a proejct will be published.
+
+**How?** Add a `publish` target to project.json, or, if publishing outside Nx, set a `willPublish` flag.
+
+```jsonc
+// project.json
+{
+  "targets": {
+    "publish": {
+      "executor": "any-executor"
+    }
+  }
+}
+```
+
+```jsonc
+// project.json
+{
+  "willPublish": true
+}
+```
+
+</details>
 
 ### Compatibility
 
@@ -239,21 +292,27 @@ Todo:
 | 🟢 **Build tools** (ts-node, esbuild, webpack etc.) | convention 1, internal distribution | Build tools will resolve the package to the compiled code without the need for any custom path mappings                |
 | 🟢 **Intellisense**                                 | convention 2                        | Imports are resolved to their source files when using features like "Go to definition"                                 |
 | 🟢 **Single-version monorepos**                     | convention 3, external distribution | A separate package is built with a generated package.json (including any detected dependencies)                        |
-| 🟠 **Publishing/versioning tools**                  | external distribution               | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
+| 🟠 **Publishing/versioning tools<sup>1</sup>**      | external distribution               | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
 
 #### Caveats
 
-- Publishing tools will probably assume that the package they version-bump is also the package to be released. This is an unavoidable consequence of this plugin's setup (to avoid package.json conflicts, the executor builds the publishable package to `{workspaceRoot}/dist`).
+1. Publishing tools generally assume that the package they version-bump is also the package to be released. The workflow with Nx plugins is slightly different: the source package should be version-bumped, and the built package (in `{workspaceRoot}/dist/{projectName}` should be published.
 
-### Bundling
+### Q&A
 
-There's a few reasons why this executor does not produce bundles:
+<h4 id="bundling">Why does the executor not bundle packages?</h4>
 
-1. Now that ES modules are implemented natively in all runtimes, a good starting point is not to bundle
-2. Bundling adds extra complexity, both in the implementation and for the user, when determining things like how to handle rewriting `import.meta.url`
+1. Now that ES modules are widely available, a good starting point is not to bundle
+2. Bundling adds extra complexity, both in the implementation and for the user, when determining things like how to handle rewriting import.meta.url
 3. There are great tools out there for bundling when it's required, and the packages that this executor produces can be consumed by them as standard node modules
 
-### Todo
+### Roadmap
 
+- Error if project does not have a package.json
+- Generate exports in package.json
+- Multiple entry points
 - Accept compatible SWC options https://swc.rs/docs/usage/cli#options
+- Accept option to specify what to do with non-publishable dependencies – error, skip, include-prebuild, include-postbuild
+- Consider accepting an array of targets for external builds, and single option for internal
 - Consider compilation of non-ESM projects/files
+- Consider exposing two executors if config options diverge between distribution strategies
