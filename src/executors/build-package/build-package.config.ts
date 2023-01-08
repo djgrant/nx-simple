@@ -12,8 +12,8 @@ export function getConfig(options: Options, context: Context) {
 
   const workspaceDistDir = path.join(context.root, "dist");
   const tmpDir = path.join(context.root, "tmp", process.env.EXECUTION_ID!);
-  const tmpLayersDir = path.join(tmpDir, "__layers__");
-  const layersDir = path.join(workspaceDistDir, "__layers__"); // this might be better in the tmp dir
+  const tmpLayersDir = path.join(tmpDir, ".nxsimple");
+  const layersDir = path.join(workspaceDistDir, ".nxsimple"); // this might be better in the tmp dir
 
   return {
     project,
