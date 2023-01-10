@@ -13,9 +13,9 @@ import {
   projectIsPackagableLib,
 } from "./contracts";
 
-export type NxSimpleNode = ProjectGraphProjectNode<{
+export type NxSimpleNode = ProjectGraphProjectNode & {
   targets?: Record<string, TargetConfiguration<any>>;
-}> & {
+} & {
   buildable: boolean;
   publishable: boolean;
   packagable: boolean;
