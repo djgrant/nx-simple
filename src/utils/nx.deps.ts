@@ -57,7 +57,7 @@ export async function getProjectDependencies(
         throw new Error(
           [
             `${node.name} cannot be packaged as a dependency. To resolve, either:`,
-            `1. Inform Nx Simple that this project will be published to NPM by adding a "publish" target or set "willPublish" to "true" in project.json`,
+            `1. Inform nx-simple that this project will be published to NPM by adding a "publish" target or set "willPublish" to "true" in project.json`,
             `2. Add a build target using the executor "nx-simple:build"`,
             `3. Add package target using the executor "nx-simple:package" and set "distribution" option to "lib"`,
           ].join("\n")

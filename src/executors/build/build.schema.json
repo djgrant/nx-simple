@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "version": 1,
   "cli": "nx",
-  "title": "Nx Simple package executor",
+  "title": "nx-simple package executor",
   "description": "Builds TypeScript projects for internal use",
   "type": "object",
   "additionalProperties": false,
