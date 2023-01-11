@@ -29,7 +29,7 @@ Compiles and packages TypeScript projects for internal use within a monorepo.
 | Param           | Type                         | Default      | Description                           |
 | --------------- | ---------------------------- | ------------ | ------------------------------------- |
 | `entry`         | `string`                     | `"index.ts"` | the package's entry module            |
-| `sourceDir`     | `string`                     | `projectDir` | the directory containing source code  |
+| `sourceDir`     | `string`                     | `"./"`       | the directory containing source code  |
 | `assets`        | `string[]`                   | `[]`         | any files to copy to the build folder |
 | `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `"es2020"`   | the target JavaScript environment     |
 

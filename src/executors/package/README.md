@@ -1,10 +1,10 @@
-## nx-simple:package
+# nx-simple:package
 
 Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
 
 The resulting package strcuture is optimised for compabatibility with CommonJS and ESM environments.
 
-### Usage
+## Usage
 
 ```jsonc
 // package.json
@@ -25,17 +25,17 @@ The resulting package strcuture is optimised for compabatibility with CommonJS a
 }
 ```
 
-### Options
+## Options
 
 | Param           | Type                         | Default      | Description                           |
 | --------------- | ---------------------------- | ------------ | ------------------------------------- |
 | `distribution`  | `"npm" \| "app" \| "lib"`    | required     | the distribution strategy             |
 | `entry`         | `string`                     | `"index.ts"` | the package's entry module            |
-| `sourceDir`     | `string`                     | `projectDir` | the directory containing source code  |
+| `sourceDir`     | `string`                     | `"./"`       | the directory containing source code  |
 | `assets`        | `string[]`                   | `[]`         | any files to copy to the build folder |
 | `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `"es2020"`   | the target JavaScript environment     |
 
-### Effects
+## Effects
 
 - The parent directory of `entry` is considered the source directory. All TypeScript files under this directory will be compiled.
 - If present, the SWC compiler will use `{projectRoot}.swcrc` as its base config
@@ -51,7 +51,7 @@ The resulting package strcuture is optimised for compabatibility with CommonJS a
 - Generates type definition (`.d.ts`) files
 - Detects, builds and packages non-publishable dependencies in a local node_modules directory
 
-### Contracts
+## Contracts
 
 <details>
 <summary><strong>1. Nx `inputs` and `outputs` are set</strong></summary>

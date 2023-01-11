@@ -4,11 +4,11 @@ An Nx plugin that helps you fall into the pit of success.
 
 ## Executors
 
-### [nx-simple:build →](./docs/executors/build.md)
+### [nx-simple:build →](./src/executors/build/README.md)
 
 > Compiles and packages TypeScript projects for internal use within a monorepo.
 
-### [nx-simple:package →](./docs/executors/package.md)
+### [nx-simple:package →](./src/executors/package/README.md)
 
 > Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
 
@@ -53,12 +53,12 @@ The plugin, globally, expects the following contracts to be fulfilled:
 
 nx-simple aims to maximise compatability with other tools in the ecosystem. This table provides an overview of how and why compatability is achieved.
 
-| Tooling                                             | Setup                                                                 | Explanation                                                                                                            |
-| --------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 🟢 **Build tools** (ts-node, esbuild, webpack etc.) | [build executor](./docs/executors/build.md#contracts) contract #1     | Build tools will resolve the package to the compiled code without the need for any custom path mappings                |
-| 🟢 **Intellisense**                                 | [build executor](./docs/executors/build.md#contracts) contract #2     | Imports are resolved to their source files when using features like "Go to definition"                                 |
-| 🟢 **Single-version monorepos**                     | [package executor](./docs/executors/package.md#contracts) contract #3 | A separate package is built with a generated package.json (including any detected dependencies)                        |
-| 🟠 **Publishing/versioning tools<sup>1</sup>**      | [package executor](./docs/executors/package.md#contracts)             | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
+| Tooling                                             | Setup                                                                       | Explanation                                                                                                            |
+| --------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 🟢 **Build tools** (ts-node, esbuild, webpack etc.) | [build executor](./src/executors/build/README.md#contracts) contract #1     | Build tools will resolve the package to the compiled code without the need for any custom path mappings                |
+| 🟢 **Intellisense**                                 | [build executor](./src/executors/build/README.md#contracts) contract #2     | Imports are resolved to their source files when using features like "Go to definition"                                 |
+| 🟢 **Single-version monorepos**                     | [package executor](./src/executors/package/README.md#contracts) contract #3 | A separate package is built with a generated package.json (including any detected dependencies)                        |
+| 🟠 **Publishing/versioning tools<sup>1</sup>**      | [package executor](./src/executors/package/README.md)                       | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
 
 #### Caveats
 
@@ -70,7 +70,7 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 
 1. Now that ES modules are widely available, a good starting point is not to bundle
 2. Bundling adds extra complexity, both in the implementation and for the user, when determining things like how to handle rewriting import.meta.url
-3. There are great tools out there for bundling when it's required, and the packages that the [build executor](./docs/executors/build.md) produces can be consumed by bundlers just as they would consume any regular package in node_modules
+3. There are great tools out there for bundling when it's required, and the packages that the [build executor](./src/executors/build/README.md) produces can be consumed by bundlers just as they would consume any regular package in node_modules
 
 ## Roadmap
 
