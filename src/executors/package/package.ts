@@ -15,6 +15,11 @@ export default async function packageExecutor(
   const layerDir = path.join(cfg.layersDir, context.projectName);
   const tmpOutDir = path.join(cfg.tmpDir, context.projectName);
 
+  if (context.isVerbose) {
+    console.log("nx-simple config:");
+    console.log({ ...cfg, layerDir, tmpOutDir });
+  }
+
   // 1. Get project dependencies
   const deps = await getProjectDependencies(
     context.projectGraph,

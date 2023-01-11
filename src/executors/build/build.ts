@@ -13,6 +13,11 @@ export default async function buildExecutor(
   const cfg = getConfig(options, context);
   const tsConfig = getTsConfig(cfg.projectDir);
 
+  if (context.isVerbose) {
+    console.log("nx-simple config:");
+    console.log(cfg);
+  }
+
   // 1. Check package.json is configured correctly
   const packageIsValid = await validateProjectPackageJson(cfg);
 
