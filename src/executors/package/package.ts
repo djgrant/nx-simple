@@ -11,6 +11,20 @@ export default async function packageExecutor(
   options: Options,
   context: Context
 ) {
+  switch (options.distribution) {
+    case "app":
+    case "npm":
+      return appOrNpmPackageExecutor(options, context);
+
+    case "lib":
+      throw new Error("No yet implemented");
+  }
+}
+
+export async function appOrNpmPackageExecutor(
+  options: Options,
+  context: Context
+) {
   const cfg = getConfig(options, context);
   const outDir = path.join(cfg.workspaceDistDir, context.projectName);
   const layerDir = path.join(cfg.layersDir, context.projectName);
