@@ -11,11 +11,6 @@ export default async function buildExecutor(
 ) {
   const cfg = getConfig(options, context);
 
-  if (context.isVerbose) {
-    console.log("nx-simple config:");
-    console.log(cfg);
-  }
-
   // 1. Validate project is setup correctly
   validateConfig(cfg);
   await validateProjectPackageJson(cfg);

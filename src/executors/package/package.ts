@@ -30,11 +30,6 @@ export async function appOrNpmPackageExecutor(
   const layerDir = path.join(cfg.layersDir, context.projectName);
   const tmpOutDir = path.join(cfg.tmpDir, context.projectName);
 
-  if (context.isVerbose) {
-    console.log("nx-simple config:");
-    console.log({ ...cfg, layerDir, tmpOutDir });
-  }
-
   // 1. Validate project is setup correctly
   validateConfig(cfg);
 
