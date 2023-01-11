@@ -24,7 +24,7 @@ export type NxSimpleNode = ProjectGraphProjectNode<{
 };
 
 export const getPackageName = (node: NxSimpleNode | ProjectGraphExternalNode) =>
-  node.type === "npm" ? node.name : node.packageName;
+  node.type === "npm" ? node.data.packageName : node.packageName;
 
 export const getVersion = (node: NxSimpleNode | ProjectGraphExternalNode) =>
   node.type === "npm" ? node.data.version : node.version;
@@ -41,7 +41,7 @@ export async function getProjectDependencies(
     projectGraph,
     projectName,
     (node) => {
-      return !nodeIsExternal(node) && projectIsPublishable(node);
+      return !nodeIsExternal(node) && !projectIsPublishable(node);
     },
     async ({ node }) => {
       if (nodeIsExternal(node)) {

@@ -20,6 +20,7 @@ export async function createPackageJson(opts: Opts) {
   packageJson.main = `./cjs/${entryNoExt}.js`;
   packageJson.module = `./esm/${entryNoExt}.js`;
   packageJson.types = `./types/${entryNoExt}.d.ts`;
+  packageJson.dependencies = {};
 
   packageJson.exports = {
     ".": {
@@ -32,10 +33,13 @@ export async function createPackageJson(opts: Opts) {
   delete packageJson.type;
   delete packageJson.devDependencies;
 
-  if (opts.publishedDependencies && packageJson.peerpublishedDependencies) {
+  const isPeerDep = (v: string) =>
+    (packageJson.peerDependencies || []).includes(v);
+
+  if (opts.publishedDependencies) {
     for (const dep of opts.publishedDependencies) {
       const packageName = getPackageName(dep);
-      if (packageName && packageJson.peerDependencies.includes(packageName)) {
+      if (packageName && !isPeerDep(packageName)) {
         packageJson.dependencies[packageName] = getVersion(dep) || "latest";
       }
     }
