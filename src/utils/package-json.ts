@@ -2,7 +2,7 @@ import path from "node:path";
 import fse from "fs-extra";
 import type { ProjectGraphExternalNode } from "@nrwl/devkit";
 import { getPackageName, getVersion, NxSimpleNode } from "./nx.deps";
-import { noExt } from "./string";
+import { noExt } from "./path";
 
 type DependencyNode = NxSimpleNode | ProjectGraphExternalNode;
 

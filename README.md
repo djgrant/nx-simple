@@ -2,16 +2,6 @@
 
 An Nx plugin that helps you fall into the pit of success.
 
-## Executors
-
-### [nx-simple:build →](./src/executors/build/README.md)
-
-> Compiles and packages TypeScript projects for internal use within a monorepo.
-
-### [nx-simple:package →](./src/executors/package/README.md)
-
-> Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
-
 ## Principles
 
 The plugin aims to achieve a predictable and cohesive development experience by adhering to the following design principles:
@@ -22,11 +12,19 @@ The plugin aims to achieve a predictable and cohesive development experience by 
 1. Any combination of options provide a working state
 1. Well-defined goals can be achieved using a "strategy" option, which encapsulates a set of functions
 
+## Executors
+
+### [nx-simple:build →](./src/executors/build/README.md)
+
+> Compiles and packages TypeScript projects for internal use within a monorepo.
+
+### [nx-simple:package →](./src/executors/package/README.md)
+
+> Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
+
 ## Contracts
 
-Each executor declares any contracts that need to be fulfiled by the user for it to work.
-
-The plugin, globally, expects the following contracts to be fulfilled:
+In addition to those specified by executors, these contracts need to be fulfilled by the plugin user:
 
 <details>
 <summary><strong>1. Nx is configured to analyse source files</strong></summary>
@@ -43,6 +41,26 @@ The plugin, globally, expects the following contracts to be fulfilled:
     "@nrwl/js": {
       "analyzeSourceFiles": true
     }
+  }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>2. Projects are configured with a `baseUrl`</strong></summary>
+<br />
+
+**Why?** The executors use the baseUrl to determine the base directory for compiling modules and to create path mappings.
+
+**How?** Add a baseUrl to the project tsconfig.json file. Ensure that the baseUrl is within the project.
+
+```jsonc
+// tsconfig.json
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "."
   }
 }
 ```

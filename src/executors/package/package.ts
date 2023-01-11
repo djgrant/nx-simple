@@ -5,6 +5,7 @@ import { createPackageJson } from "utils/package-json";
 import { getProjectDependencies } from "utils/nx.deps";
 import { Options, Context } from "./package.types";
 import { buildLayer } from "./package.layer";
+import { validateConfig } from "../../utils/contracts";
 
 export default async function packageExecutor(
   options: Options,
@@ -20,24 +21,27 @@ export default async function packageExecutor(
     console.log({ ...cfg, layerDir, tmpOutDir });
   }
 
-  // 1. Get project dependencies
+  // 1. Validate project is setup correctly
+  validateConfig(cfg);
+
+  // 2. Get project dependencies
   const deps = await getProjectDependencies(
     context.projectGraph,
     context.projectName,
     context.root
   );
 
-  // 2. Compile current layer
+  // 3. Compile current layer
   console.log(`Building layer for ${context.projectName}...`);
 
   await buildLayer(cfg);
   await fse.copy(layerDir, tmpOutDir);
 
-  // 3. Copy non-publishable builds to publishable distribution
+  // 4. Copy non-publishable builds to publishable distribution
   if (deps.unpublished.length) {
     try {
       for (const dep of deps.unpublished) {
-        // 3a. Build sub package programatically if project does not have a package executor
+        // 4a. Build sub package programatically if project does not have a package executor
         if (!dep.packagable) {
           // Not publishable or packagable, so build executor will exist
           const targets = Object.values(dep.data.targets!);
@@ -62,7 +66,7 @@ export default async function packageExecutor(
           await buildLayer(layerConfig);
         }
 
-        // 3b. Copy dependency layer to current layer
+        // 4b. Copy dependency layer to current layer
         for (const fmt of ["cjs", "esm"]) {
           const src = path.join(cfg.layersDir, dep.name);
           const dest = path.join(tmpOutDir, fmt, "node_modules", dep.name);
@@ -75,7 +79,7 @@ export default async function packageExecutor(
     }
   }
 
-  // 4. Create package.json
+  // 5. Create package.json
   await createPackageJson({
     projectDir: cfg.projectDir,
     outDir: tmpOutDir,
@@ -83,10 +87,10 @@ export default async function packageExecutor(
     publishedDependencies: deps.published,
   });
 
-  // 5. Move to publish directory
+  // 6. Move to publish directory
   await fse.move(tmpOutDir, outDir, { overwrite: true });
 
-  // 6. Cleanup
+  // 7. Cleanup
   await fse.remove(cfg.tmpDir);
 
   return { success: true };

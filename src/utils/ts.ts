@@ -38,7 +38,9 @@ export function getTsConfig(projectDir: string) {
     "tsconfig.json"
   );
 
-  if (!configFileName) return null;
+  if (!configFileName) {
+    throw new Error(`tsconfig.json not found in ${projectDir}`);
+  }
 
   const tsConfigRaw = ts.readConfigFile(configFileName, ts.sys.readFile);
 

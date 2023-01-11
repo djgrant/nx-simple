@@ -1,34 +1,20 @@
 import path from "node:path";
 import ts from "typescript";
 import fse from "fs-extra";
+import { isPath } from "./path";
 
 type PathMappingOptions = {
-  tsConfig: ts.ParsedCommandLine | null;
+  tsConfig: ts.ParsedCommandLine;
   srcDir: string;
 };
 export async function getSwcPathMappings(opts: PathMappingOptions) {
-  if (!opts.tsConfig) return {};
-
   const tsBasePath = opts.tsConfig.options.baseUrl!;
   const tsPathsBasePath = opts.tsConfig.options.pathsBasePath as string;
 
-  const isPath = (_path: string) => ({
-    parentOf: (child: string) => {
-      return _path.split(path.sep) < child.split(path.sep);
-    },
-  });
-
-  const baseUrlInSrcDir = !isPath(tsBasePath).parentOf(opts.srcDir);
-  const pathsInSrcDir = !isPath(tsPathsBasePath).parentOf(tsBasePath);
-
-  if (!baseUrlInSrcDir) {
-    throw new Error(
-      `tsconfig baseUrl should not be outside the source directory\n baseUrl: ${tsBasePath}\n soureDirectory: ${opts.srcDir}\n`
-    );
-  }
-
   const swcBaseUrl = path.relative(opts.srcDir, tsBasePath) || ".";
   const swcPaths: Record<string, string[]> = {};
+
+  const pathsInSrcDir = !isPath(tsPathsBasePath).parentOf(tsBasePath);
 
   if (opts.tsConfig.options.paths && pathsInSrcDir) {
     for (const [pathKey, locations] of Object.entries(

@@ -7,13 +7,10 @@ import { createPackageJson } from "utils/package-json";
 import { runSwc } from "utils/swc";
 import { generateTsDefinitions, getTsConfig } from "utils/ts";
 import { getSwcPathMappings } from "utils/swc.paths";
-import { Options, Context } from "./package.types";
 
 const glob = util.promisify(globCb);
 
 export async function buildLayer(cfg: Config) {
-  const tsConfig = getTsConfig(cfg.projectDir);
-
   const tmpOutDir = path.join(cfg.tmpLayersDir, cfg.projectName);
   const outDir = path.join(cfg.layersDir, cfg.projectName);
 
@@ -31,10 +28,17 @@ export async function buildLayer(cfg: Config) {
   console.log(`Type checking ${cfg.projectName}...`);
 
   const typeCheckStart = performance.now();
-  const typesValid = generateTsDefinitions(cfg.entryPath, tmpOutDir, tsConfig);
+
+  const typesValid = generateTsDefinitions(
+    cfg.entryPath,
+    tmpOutDir,
+    cfg.tsConfig
+  );
 
   if (!typesValid) {
-    throw new Error("");
+    throw new Error(
+      `Could not build layer ${cfg.projectName} because type check failed`
+    );
   }
 
   const typeCheckDuration = (performance.now() - typeCheckStart).toFixed(2);
@@ -43,8 +47,8 @@ export async function buildLayer(cfg: Config) {
 
   // 4. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    tsConfig: tsConfig,
-    srcDir: cfg.projectSrcDir,
+    tsConfig: cfg.tsConfig,
+    srcDir: cfg.projectBaseDir,
   });
 
   // 5. Compile source files
@@ -52,7 +56,7 @@ export async function buildLayer(cfg: Config) {
 
   const baseSwcConfig = {
     projectDir: cfg.projectDir,
-    srcDir: cfg.projectSrcDir,
+    srcDir: cfg.projectBaseDir,
     ignoreDir: cfg.projectDistDir,
     target: cfg.targetRuntime,
     sourceMaps: false,

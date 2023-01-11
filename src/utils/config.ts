@@ -1,6 +1,9 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { ExecutorOptions, ExecutorContext } from "utils/types";
+import ts from "typescript";
+import { getTsConfig } from "./ts";
+import { isPath } from "./path";
 
 const executionId = randomUUID();
 
@@ -11,7 +14,7 @@ const defaultOptions = {
 };
 
 export type Config = ReturnType<typeof getConfig>;
-
+ts;
 export function getConfig(
   userOptions: ExecutorOptions,
   context: ExecutorContext
@@ -20,13 +23,20 @@ export function getConfig(
   const projectName = context.projectName;
   const project = context.workspace.projects[context.projectName]!;
   const projectDir = path.join(context.root, project.root);
-  const projectSrcDir = options.sourceDir || projectDir;
+
+  const tsConfig = getTsConfig(projectDir);
+
+  const projectBaseDir = tsConfig.options.baseUrl;
+
+  if (!projectBaseDir) {
+    throw new Error("tsconfig.json must have a baseUrl");
+  }
+
   const projectDistDir = path.join(projectDir, "dist");
 
   const entryPath = path.join(projectDir, options.entry);
-
+  const entryRelativeToSrcDir = path.relative(projectBaseDir, entryPath);
   const entryRelativeToProjectDir = options.entry;
-  const entryRelativeToSrcDir = path.relative(projectSrcDir, entryPath);
 
   const workspaceDistDir = path.join(context.root, "dist");
   const tmpDir = path.join(context.root, "tmp", executionId);
@@ -40,11 +50,12 @@ export function getConfig(
     entryRelativeToSrcDir,
     projectName,
     projectDir,
-    projectSrcDir,
+    projectBaseDir,
     projectDistDir,
     workspaceDistDir,
     tmpDir,
     tmpLayersDir,
     layersDir,
+    tsConfig,
   };
 }

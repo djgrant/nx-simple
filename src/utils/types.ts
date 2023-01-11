@@ -5,6 +5,6 @@ export type ExecutorContext = Required<BaseExecutorContext>;
 export type ExecutorOptions = {
   assets?: string[];
   entry?: string;
-  sourceDir?: string;
+  baseDir?: string;
   targetRuntime?: string;
 };

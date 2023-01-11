@@ -1,7 +1,46 @@
 import fse from "fs-extra";
 import { ProjectGraphProjectNode, TargetConfiguration } from "@nrwl/devkit";
 import { Config } from "./config";
-import { noExt } from "./string";
+import { isPath, noExt } from "./path";
+
+export function validateConfig(cfg: Config) {
+  const baseUrlInProjectDir = !isPath(cfg.projectBaseDir).parentOf(
+    cfg.projectDir
+  );
+  if (!baseUrlInProjectDir) {
+    throw new Error(
+      `tsconfig baseUrl should not be outside the project directory\n baseUrl: ${cfg.projectBaseDir}\n soureDirectory: ${cfg.projectDir}\n`
+    );
+  }
+}
+
+export async function validateProjectPackageJson(cfg: Config) {
+  const packageJson = await fse.readJSON(`${cfg.projectDir}/package.json`);
+
+  // 1. Warnings
+  // todo: handle paths ending in "." or "./"
+  const typesFile = cfg.entryRelativeToProjectDir;
+  const typesFileName = noExt(typesFile);
+
+  const validTypeFields: (string | undefined)[] = [typesFile, typesFileName];
+
+  if (typesFileName === "index") validTypeFields.push(undefined);
+
+  if (!validTypeFields.includes(packageJson.types)) {
+    console.warn(
+      `[WARNING] ${cfg.projectName} package.json "types" field does not point to the entry module. Set it to ${cfg.entryPath} to get intellisense support in your IDE.`
+    );
+  }
+
+  // 2. Errors
+  const mainField = `dist/${noExt(cfg.entryRelativeToSrcDir)}.js`;
+
+  if (!packageJson.main || packageJson.main !== mainField) {
+    throw new Error(
+      `${cfg.projectName} package.json "main" field should point to ${mainField}".`
+    );
+  }
+}
 
 export function projectIsPackagableLib(node?: ProjectGraphProjectNode) {
   if (!node) return false;
@@ -36,33 +75,4 @@ export function projectIsPublishable(node?: ProjectGraphProjectNode) {
     );
 
   return (node.data as any).willPublish || hasPublishTarget();
-}
-
-export async function validateProjectPackageJson(cfg: Config) {
-  const packageJson = await fse.readJSON(`${cfg.projectDir}/package.json`);
-  const mainField = `dist/${noExt(cfg.entryRelativeToSrcDir)}.js`;
-
-  console.log(mainField, packageJson.main);
-  if (!packageJson.main || packageJson.main !== mainField) {
-    console.error(
-      `[ERROR] ${cfg.projectName} package.json "main" field should point to ${mainField}".`
-    );
-    return false;
-  }
-
-  // todo: handle paths ending in "." or "./"
-  const typesFile = cfg.entryRelativeToProjectDir;
-  const typesFileName = noExt(typesFile);
-
-  const validTypeFields: (string | undefined)[] = [typesFile, typesFileName];
-
-  if (typesFileName === "index") validTypeFields.push(undefined);
-
-  if (!validTypeFields.includes(packageJson.types)) {
-    console.error(
-      `[WARNING] ${cfg.projectName} package.json "types" field does not point to the entry module. Set it to ${cfg.entryPath} to get intellisense support in your IDE.`
-    );
-  }
-
-  return true;
 }

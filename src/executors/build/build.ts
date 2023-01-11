@@ -1,9 +1,8 @@
 import fse from "fs-extra";
 import { getConfig } from "utils/config";
-import { validateProjectPackageJson } from "utils/contracts";
+import { validateConfig, validateProjectPackageJson } from "utils/contracts";
 import { runSwc } from "utils/swc";
 import { getSwcPathMappings } from "utils/swc.paths";
-import { getTsConfig } from "../../utils/ts";
 import { Options, Context } from "./build.types";
 
 export default async function buildExecutor(
@@ -11,17 +10,15 @@ export default async function buildExecutor(
   context: Context
 ) {
   const cfg = getConfig(options, context);
-  const tsConfig = getTsConfig(cfg.projectDir);
 
   if (context.isVerbose) {
     console.log("nx-simple config:");
     console.log(cfg);
   }
 
-  // 1. Check package.json is configured correctly
-  const packageIsValid = await validateProjectPackageJson(cfg);
-
-  if (!packageIsValid) return { success: false };
+  // 1. Validate project is setup correctly
+  validateConfig(cfg);
+  await validateProjectPackageJson(cfg);
 
   // 2. Clean slate
   await fse.remove(cfg.projectDistDir);
@@ -29,15 +26,15 @@ export default async function buildExecutor(
 
   // 3. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    tsConfig: tsConfig,
-    srcDir: cfg.projectSrcDir,
+    tsConfig: cfg.tsConfig,
+    srcDir: cfg.projectBaseDir,
   });
 
   // 4. Compile to ESM
   try {
     await runSwc({
       projectDir: cfg.projectDir,
-      srcDir: cfg.projectSrcDir,
+      srcDir: cfg.projectBaseDir,
       outDir: cfg.projectDistDir,
       ignoreDir: cfg.projectDistDir,
       target: cfg.targetRuntime,
