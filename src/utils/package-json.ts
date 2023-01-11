@@ -9,22 +9,30 @@ type Opts = {
   projectDir: string;
   outDir: string;
   entry: string;
-  dependencies?: DependencyNode[];
+  publishedDependencies?: DependencyNode[];
 };
 
 export async function createPackageJson(opts: Opts) {
   const packageJson = await fse.readJSON(`${opts.projectDir}/package.json`);
   const entryNoExt = path.parse(opts.entry).name;
 
-  packageJson.main = `cjs/${entryNoExt}.js`;
-  packageJson.module = `esm/${entryNoExt}.js`;
-  packageJson.types = `types/${entryNoExt}.d.ts`;
+  packageJson.main = `./cjs/${entryNoExt}.js`;
+  packageJson.module = `./esm/${entryNoExt}.js`;
+  packageJson.types = `./types/${entryNoExt}.d.ts`;
+
+  packageJson.exports = {
+    ".": {
+      require: packageJson.main,
+      default: packageJson.module,
+      types: packageJson.types,
+    },
+  };
 
   delete packageJson.type;
   delete packageJson.devDependencies;
 
-  if (opts.dependencies && packageJson.peerDependencies) {
-    for (const dep of opts.dependencies) {
+  if (opts.publishedDependencies && packageJson.peerpublishedDependencies) {
+    for (const dep of opts.publishedDependencies) {
       const packageName = getPackageName(dep);
       if (packageName && packageJson.peerDependencies.includes(packageName)) {
         packageJson.dependencies[packageName] = getVersion(dep) || "latest";

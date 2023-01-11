@@ -63,17 +63,30 @@ export async function buildLayer(cfg: Config) {
   await Promise.all([
     runSwc({
       ...baseSwcConfig,
-      outDir: `${tmpOutDir}/esm`,
+      outDir: path.join(tmpOutDir, "esm"),
       moduleType: "es6",
       ignoreDir: cfg.projectDistDir,
     }),
     runSwc({
       ...baseSwcConfig,
-      outDir: `${tmpOutDir}/cjs`,
+      outDir: path.join(tmpOutDir, "cjs"),
       moduleType: "commonjs",
       ignoreDir: cfg.projectDistDir,
     }),
   ]);
+
+  // 6. Create package.json files to specify module type
+  await fse.writeJson(
+    path.join(tmpOutDir, "cjs", "package.json"),
+    { type: "commonjs" },
+    { spaces: 2 }
+  );
+
+  await fse.writeJson(
+    path.join(tmpOutDir, "esm", "package.json"),
+    { type: "module" },
+    { spaces: 2 }
+  );
 
   // 6. Copy assets
   const defaultFilesRe = /^(readme|licence|license)(|\.[a-z]+)$/i;

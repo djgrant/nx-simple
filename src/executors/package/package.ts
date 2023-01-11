@@ -75,7 +75,7 @@ export default async function packageExecutor(
     projectDir: cfg.projectDir,
     outDir: tmpOutDir,
     entry: cfg.entryRelativeToSrcDir,
-    dependencies: deps.published,
+    publishedDependencies: deps.published,
   });
 
   // 5. Move to publish directory
