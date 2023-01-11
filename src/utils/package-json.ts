@@ -1,4 +1,3 @@
-import path from "node:path";
 import fse from "fs-extra";
 import type { ProjectGraphExternalNode } from "@nrwl/devkit";
 import { getPackageName, getVersion, NxSimpleNode } from "./nx.deps";
@@ -19,7 +18,7 @@ export async function createPackageJson(opts: Opts) {
 
   packageJson.main = `./cjs/${entryNoExt}.js`;
   packageJson.module = `./esm/${entryNoExt}.js`;
-  packageJson.types = `./types/${entryNoExt}.d.ts`;
+  packageJson.types = `./esm/${entryNoExt}.d.ts`;
   packageJson.dependencies = {};
 
   packageJson.exports = {

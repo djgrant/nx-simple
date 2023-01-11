@@ -11,7 +11,7 @@ export function generateTsDefinitions(
       ...(tsConfig?.options || {}),
       declaration: true,
       emitDeclarationOnly: true,
-      declarationDir: `${publishDir}/types`,
+      declarationDir: `${publishDir}/esm`,
     },
   });
 
