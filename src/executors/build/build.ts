@@ -3,6 +3,7 @@ import { getConfig } from "utils/config";
 import { validateConfig, validateProjectPackageJson } from "utils/contracts";
 import { runSwc } from "utils/swc";
 import { getSwcPathMappings } from "utils/swc.paths";
+import { copyAssets } from "../../utils/assets";
 import { Options, Context } from "./build.types";
 
 export default async function buildExecutor(
@@ -42,6 +43,9 @@ export default async function buildExecutor(
     console.error(err);
     return { success: false };
   }
+
+  // 5. Copy assets
+  await copyAssets(cfg, { outDir: cfg.projectDistDir });
 
   return { success: true };
 }

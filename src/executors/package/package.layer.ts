@@ -1,14 +1,11 @@
 import path from "node:path";
-import util from "node:util";
 import fse from "fs-extra";
-import globCb from "glob";
 import { Config } from "utils/config";
 import { createPackageJson } from "utils/package-json";
 import { runSwc } from "utils/swc";
 import { generateTsDefinitions, getTsConfig } from "utils/ts";
 import { getSwcPathMappings } from "utils/swc.paths";
-
-const glob = util.promisify(globCb);
+import { copyAssets } from "../../utils/assets";
 
 export async function buildLayer(cfg: Config) {
   const tmpOutDir = path.join(cfg.tmpLayersDir, cfg.projectName);
@@ -93,23 +90,10 @@ export async function buildLayer(cfg: Config) {
   );
 
   // 6. Copy assets
-  const defaultFilesRe = /^(readme|licence|license)(|\.[a-z]+)$/i;
-  const filePaths = await glob(`${cfg.projectDir}/**/*`, {
-    nodir: true,
-    ignore: `${cfg.projectDir}/dist/**/*`,
+  await copyAssets(cfg, {
+    outDir: tmpOutDir,
+    baseDirOutDirs: ["esm", "cjs"].map((f) => path.join(tmpOutDir, f)),
   });
-
-  for (const filePath of filePaths) {
-    const relativeFilePath = path.relative(cfg.projectDir, "");
-    if (
-      relativeFilePath.match(defaultFilesRe) ||
-      cfg.assets.includes(relativeFilePath)
-    ) {
-      const distFilePath = path.join(tmpOutDir, relativeFilePath);
-      await fse.ensureDir(path.dirname(distFilePath));
-      await fse.copyFile(filePath, distFilePath);
-    }
-  }
 
   // 7. Move artefacts to cacheable folder
   await fse.move(tmpOutDir, outDir, { overwrite: true });
