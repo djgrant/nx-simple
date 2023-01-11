@@ -40,16 +40,10 @@ This executor does not bundle modules for a few [reasons](#bundling), but the pa
 {
   "targets": {
     "build": {
-      "executor": "nx-simple:build-package",
-      "options": {
-        "distribution": "internal"
-      }
+      "executor": "nx-simple:build"
     },
     "prepublish": {
-      "executor": "nx-simple:build-package",
-      "options": {
-        "distribution": "external"
-      }
+      "executor": "nx-simple:package"
     }
   }
 }
@@ -57,12 +51,13 @@ This executor does not bundle modules for a few [reasons](#bundling), but the pa
 
 ### Options
 
-| Param           | Type                         | Default    | Description                           |
-| --------------- | ---------------------------- | ---------- | ------------------------------------- |
-| `distribution`  | `"internal" \| "external"`   | required   | the distribution strategy             |
-| `entry`         | `string`                     | `index.ts` | the package's entry module            |
-| `assets`        | `string[]`                   | `[]`       | any files to copy to the build folder |
-| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `es2020`   | the target JavaScript environment     |
+| Param           | Type                         | Default      | Description                           |
+| --------------- | ---------------------------- | ------------ | ------------------------------------- |
+| `distribution`  | `"internal" \| "external"`   | required     | the distribution strategy             |
+| `entry`         | `string`                     | `"index.ts"` | the package's entry module            |
+| `sourceDir`     | `string`                     | `projectDir` | the directory containing source code  |
+| `assets`        | `string[]`                   | `[]`         | any files to copy to the build folder |
+| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `"es2020"`   | the target JavaScript environment     |
 
 ### Effects
 

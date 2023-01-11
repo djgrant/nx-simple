@@ -2,28 +2,20 @@ import path from "node:path";
 import util from "node:util";
 import fse from "fs-extra";
 import globCb from "glob";
+import { Config } from "utils/config";
+import { createPackageJson } from "utils/package-json";
 import { runSwc } from "utils/swc";
 import { generateTsDefinitions, getTsConfig } from "utils/ts";
-import { createPackageJson } from "utils/package";
 import { getSwcPathMappings } from "utils/swc.paths";
-import { getConfig } from "./build-package.config";
-import { Options, Context } from "./build-package.types";
+import { Options, Context } from "./package.types";
 
 const glob = util.promisify(globCb);
 
-/**
- * @description
- *  Compiles layers for project and each of its unpublishable dependencies.
- *  Packages dependent layers into output and emits a package.json for publishing.
- */
-export async function runLayerExecutor(
-  options: Required<Options>,
-  context: Context
-) {
-  const cfg = getConfig(options, context);
+export async function buildLayer(cfg: Config) {
   const tsConfig = getTsConfig(cfg.projectDir);
-  const tmpOutDir = `${cfg.tmpLayersDir}/${context.projectName}`;
-  const outDir = `${cfg.layersDir}/${context.projectName}`;
+
+  const tmpOutDir = path.join(cfg.tmpLayersDir, cfg.projectName);
+  const outDir = path.join(cfg.layersDir, cfg.projectName);
 
   // 1. Create tmp output directory
   await fse.ensureDir(tmpOutDir);
@@ -32,16 +24,18 @@ export async function runLayerExecutor(
   await createPackageJson({
     projectDir: cfg.projectDir,
     outDir: tmpOutDir,
-    entryModuleName: cfg.entryModuleName,
+    entry: cfg.entryRelativeToSrcDir,
   });
 
   // 3. Typecheck and generate type definitions
-  console.log(`Type checking ${context.projectName}...`);
+  console.log(`Type checking ${cfg.projectName}...`);
 
   const typeCheckStart = performance.now();
-  const typesValid = generateTsDefinitions(cfg.entry, tmpOutDir, tsConfig);
+  const typesValid = generateTsDefinitions(cfg.entryPath, tmpOutDir, tsConfig);
 
-  if (!typesValid) return { success: false };
+  if (!typesValid) {
+    throw new Error("");
+  }
 
   const typeCheckDuration = (performance.now() - typeCheckStart).toFixed(2);
 
@@ -49,42 +43,37 @@ export async function runLayerExecutor(
 
   // 4. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    tsConfig,
+    tsConfig: tsConfig,
     srcDir: cfg.projectSrcDir,
   });
 
   // 5. Compile source files
-  console.log(`Compiling ${context.projectName}...`);
+  console.log(`Compiling ${cfg.projectName}...`);
 
   const baseSwcConfig = {
     projectDir: cfg.projectDir,
     srcDir: cfg.projectSrcDir,
     ignoreDir: cfg.projectDistDir,
-    target: options.targetRuntime,
+    target: cfg.targetRuntime,
     sourceMaps: false,
     paths: paths,
     baseUrl: baseUrl,
   };
 
-  try {
-    await Promise.all([
-      runSwc({
-        ...baseSwcConfig,
-        outDir: `${tmpOutDir}/esm`,
-        moduleType: "es6",
-        ignoreDir: cfg.projectDistDir,
-      }),
-      runSwc({
-        ...baseSwcConfig,
-        outDir: `${tmpOutDir}/cjs`,
-        moduleType: "commonjs",
-        ignoreDir: cfg.projectDistDir,
-      }),
-    ]);
-  } catch (err) {
-    console.error(err);
-    return { success: false };
-  }
+  await Promise.all([
+    runSwc({
+      ...baseSwcConfig,
+      outDir: `${tmpOutDir}/esm`,
+      moduleType: "es6",
+      ignoreDir: cfg.projectDistDir,
+    }),
+    runSwc({
+      ...baseSwcConfig,
+      outDir: `${tmpOutDir}/cjs`,
+      moduleType: "commonjs",
+      ignoreDir: cfg.projectDistDir,
+    }),
+  ]);
 
   // 6. Copy assets
   const defaultFilesRe = /^(readme|licence|license)(|\.[a-z]+)$/i;
@@ -94,23 +83,20 @@ export async function runLayerExecutor(
   });
 
   for (const filePath of filePaths) {
-    const relativeFilePath = filePath.replace(`${cfg.projectDir}/`, "");
+    const relativeFilePath = path.relative(cfg.projectDir, "");
     if (
       relativeFilePath.match(defaultFilesRe) ||
-      options.assets.includes(relativeFilePath)
+      cfg.assets.includes(relativeFilePath)
     ) {
-      const distFilePath = `${tmpOutDir}/${relativeFilePath}`;
+      const distFilePath = path.join(tmpOutDir, relativeFilePath);
       await fse.ensureDir(path.dirname(distFilePath));
       await fse.copyFile(filePath, distFilePath);
     }
   }
 
   // 7. Move artefacts to cacheable folder
-  await fse.remove(outDir);
-  await fse.move(tmpOutDir, outDir);
+  await fse.move(tmpOutDir, outDir, { overwrite: true });
 
   // 8. Cleanup
   await fse.remove(tmpOutDir);
-
-  return { success: true };
 }

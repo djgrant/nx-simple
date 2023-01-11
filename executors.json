@@ -1,10 +1,15 @@
 {
   "$schema": "http://json-schema.org/schema",
   "executors": {
-    "build-package": {
-      "implementation": "./dist/executors/build-package/build-package",
-      "schema": "./src/executors/build-package/schema.json",
-      "description": "Builds TypeScript packages"
+    "build": {
+      "implementation": "./dist/executors/build/build",
+      "schema": "./src/executors/build/build.schema.json",
+      "description": "Builds TypeScript packages for internal use"
+    },
+    "package": {
+      "implementation": "./dist/executors/package/package",
+      "schema": "./src/executors/package/package.schema.json",
+      "description": "Builds TypeScript packages for external use"
     }
   }
 }

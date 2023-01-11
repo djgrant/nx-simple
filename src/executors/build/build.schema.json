@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "version": 1,
+  "cli": "nx",
+  "title": "Nx Simple package executor",
+  "description": "Builds TypeScript projects for internal use",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "assets": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "entry": {
+      "type": "string",
+      "description": "Package entry module",
+      "default": "index.ts"
+    },
+    "targetRuntime": {
+      "type": "string",
+      "description": "The target runtime environment",
+      "default": "es2020"
+    }
+  }
+}

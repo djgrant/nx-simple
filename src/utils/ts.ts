@@ -31,10 +31,6 @@ export function generateTsDefinitions(
   return true;
 }
 
-export function stripTsExtension(filePath: string) {
-  return filePath.replace(/\.tsx?$/, "");
-}
-
 export function getTsConfig(projectDir: string) {
   const configFileName = ts.findConfigFile(
     projectDir,
