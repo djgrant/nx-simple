@@ -1,7 +1,7 @@
-import path from "node:path";
 import fse from "fs-extra";
 import { ProjectGraphProjectNode, TargetConfiguration } from "@nrwl/devkit";
 import { Config } from "./config";
+import { noExt } from "./string";
 
 export function projectIsPackagableLib(node?: ProjectGraphProjectNode) {
   if (!node) return false;
@@ -40,8 +40,9 @@ export function projectIsPublishable(node?: ProjectGraphProjectNode) {
 
 export async function validateProjectPackageJson(cfg: Config) {
   const packageJson = await fse.readJSON(`${cfg.projectDir}/package.json`);
-  const mainField = `dist/${path.parse(cfg.entryRelativeToProjectDir).name}.js`;
+  const mainField = `dist/${noExt(cfg.entryRelativeToSrcDir)}.js`;
 
+  console.log(mainField, packageJson.main);
   if (!packageJson.main || packageJson.main !== mainField) {
     console.error(
       `[ERROR] ${cfg.projectName} package.json "main" field should point to ${mainField}".`
@@ -51,7 +52,7 @@ export async function validateProjectPackageJson(cfg: Config) {
 
   // todo: handle paths ending in "." or "./"
   const typesFile = cfg.entryRelativeToProjectDir;
-  const typesFileName = path.parse(typesFile).name;
+  const typesFileName = noExt(typesFile);
 
   const validTypeFields: (string | undefined)[] = [typesFile, typesFileName];
 

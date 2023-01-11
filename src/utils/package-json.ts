@@ -2,6 +2,7 @@ import path from "node:path";
 import fse from "fs-extra";
 import type { ProjectGraphExternalNode } from "@nrwl/devkit";
 import { getPackageName, getVersion, NxSimpleNode } from "./nx.deps";
+import { noExt } from "./string";
 
 type DependencyNode = NxSimpleNode | ProjectGraphExternalNode;
 
@@ -14,7 +15,7 @@ type Opts = {
 
 export async function createPackageJson(opts: Opts) {
   const packageJson = await fse.readJSON(`${opts.projectDir}/package.json`);
-  const entryNoExt = path.parse(opts.entry).name;
+  const entryNoExt = noExt(opts.entry);
 
   packageJson.main = `./cjs/${entryNoExt}.js`;
   packageJson.module = `./esm/${entryNoExt}.js`;
