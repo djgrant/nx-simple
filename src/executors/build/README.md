@@ -144,12 +144,8 @@ Compiles and packages TypeScript projects for internal use within a monorepo.
   },
   "targetDefaults": {
     "nx-simple:build": {
-      "inputs": ["default", "^default"],
-      "outputs": [
-        "{projectRoot}/dist",
-        "{workspaceRoot}/dist/{projectName}",
-        "{workspaceRoot}/dist/.nxsimple/{projectName}"
-      ],
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["^nx-simple:build"]
     }
   }

@@ -71,9 +71,10 @@ The resulting package strcuture is optimised for compabatibility with CommonJS a
     "nx-simple:package": {
       "inputs": ["default", "^default"],
       "outputs": [
-        "{workspaceRoot}/dist/{projectName}",
-        "{workspaceRoot}/dist/.nxsimple/{projectName}"
-      ]
+        "{workspaceRoot}/dist/.nxsimple/{projectName}",
+        "{workspaceRoot}/dist/{projectName}"
+      ],
+      "dependsOn": ["^nx-simple:package", "publish"]
     }
   }
 }
