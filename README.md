@@ -22,61 +22,16 @@ The plugin aims to achieve a predictable and cohesive development experience by 
 
 > Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
 
-## Contracts
-
-In addition to those specified by executors, these contracts need to be fulfilled by the plugin user:
-
-<details>
-<summary><strong>1. Nx is configured to analyse source files</strong></summary>
-<br />
-
-**Why?** When using a single-version policy (i.e. dependencies are declared in root package.json), Nx needs to be configured to detect dependencies within modules.
-
-**How?** Enable the `analyzeSourceFiles`. Unless you have a Lerna repo, this will be on by default.
-
-```jsonc
-// nx.json
-{
-  "pluginsConfig": {
-    "@nrwl/js": {
-      "analyzeSourceFiles": true
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>2. Projects are configured with a `baseUrl`</strong></summary>
-<br />
-
-**Why?** The executors use the baseUrl to determine the base directory for compiling modules and to create path mappings.
-
-**How?** Add a baseUrl to the project tsconfig.json file. Ensure that the baseUrl is within the project.
-
-```jsonc
-// tsconfig.json
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "."
-  }
-}
-```
-
-</details>
-
 ## Compatibility
 
 nx-simple aims to maximise compatability with other tools in the ecosystem. This table provides an overview of how and why compatability is achieved.
 
-| Tooling                                             | Setup                                                                       | Explanation                                                                                                            |
-| --------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 🟢 **Build tools** (ts-node, esbuild, webpack etc.) | [build executor](./src/executors/build/README.md#contracts) contract #1     | Build tools will resolve the package to the compiled code without the need for any custom path mappings                |
-| 🟢 **Intellisense**                                 | [build executor](./src/executors/build/README.md#contracts) contract #2     | Imports are resolved to their source files when using features like "Go to definition"                                 |
-| 🟢 **Single-version monorepos**                     | [package executor](./src/executors/package/README.md#contracts) contract #3 | A separate package is built with a generated package.json (including any detected dependencies)                        |
-| 🟠 **Publishing/versioning tools<sup>1</sup>**      | [package executor](./src/executors/package/README.md)                       | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
+| Tooling                                             | Setup                                                                                            | Explanation                                                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| 🟢 **Build tools** (ts-node, esbuild, webpack etc.) | using the [build executor](./src/executors/build/README.md#) and setting up NPM workspaces       | Build tools will resolve the package to the compiled code without the need for any custom path mappings                |
+| 🟢 **Intellisense**                                 | [setting up](./src/executors/build/README.md#package-json-project) package.json types field      | Imports are resolved to their source files when using features like "Go to definition"                                 |
+| 🟢 **Single-version monorepos**                     | using the [package executor](./src/executors/package/README.md) to detect dependencies           | A separate package is built with a generated package.json (including any detected dependencies)                        |
+| 🟠 **Publishing/versioning tools<sup>1</sup>**      | using the [package executor](./src/executors/package/README.md) to create distributable packages | Versioning is applied to source packages as normal. Only packages built to `{workspaceRoot}/dist` should be published. |
 
 #### Caveats
 

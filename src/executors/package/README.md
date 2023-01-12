@@ -2,67 +2,110 @@
 
 Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
 
-The resulting package strcuture is optimised for compabatibility with CommonJS and ESM environments.
+- Creates a publishable package to `{workspaceRoot}/dist/{projectName}` compatible with ESM and CJS environments
+- Generates a `package.json` with `main`, `module`, `exports` and `dependencies` fields
+- Copies any README, LICENSE, LICENCE files along with specified `assets`
+- Uses `{projectRoot}.swcrc` as base SWC config, if present
+- Generates SWC path mappings based on tsconfig `baseUrl` & `paths`
+- Type checks project using nearest `tsconfig.json`
+- Generates type definition (`.d.ts`) files
+- Detects and packages non-publishable dependencies into a local node_modules directory
 
 ## Usage
 
-```jsonc
-// package.json
-{
-  "name": "my-package",
-  "version": "1.0.0"
-}
-```
+<details open> 
+<summary><strong>project.json</strong></summary>
+<br />
 
 ```jsonc
-// project.json (see options)
 {
   "targets": {
-    "prepublish": {
-      "executor": "nx-simple:package"
+    "build": {
+      "executor": "nx-simple:package",
+      "options": {
+        "distribution": "npm",
+        "entry": "index.ts",
+        "targetRuntime": "es2018"
+      }
     }
   }
 }
 ```
 
-## Options
+</details>
 
-| Param           | Type                         | Default      | Description                           |
-| --------------- | ---------------------------- | ------------ | ------------------------------------- |
-| `distribution`  | `"npm" \| "app" \| "lib"`    | required     | the distribution strategy             |
-| `entry`         | `string`                     | `"index.ts"` | the package's entry module            |
-| `sourceDir`     | `string`                     | `"./"`       | the directory containing source code  |
-| `assets`        | `string[]`                   | `[]`         | any files to copy to the build folder |
-| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | `"es2020"`   | the target JavaScript environment     |
-
-## Effects
-
-- The parent directory of `entry` is considered the source directory. All TypeScript files under this directory will be compiled.
-- If present, the SWC compiler will use `{projectRoot}.swcrc` as its base config
-- Creates path mappings based on tsconfig `baseUrl` & `paths`
-- Compiles a publishable package to `{workspaceRoot}/dist/{projectName}`
-- Compiles ESM and CJS versions of the source modules
-- Generates a `package.json`
-- Adds detected dependencies to `package.json`
-- Adds `main` and `module` fields to `package.json`
-- Copies any README, LICENSE, LICENCE files
-- Type checks project using nearest `tsconfig.json`
-- Type checks any included packages
-- Generates type definition (`.d.ts`) files
-- Detects, builds and packages non-publishable dependencies in a local node_modules directory
-
-## Contracts
-
-<details>
-<summary><strong>1. Nx `inputs` and `outputs` are set</strong></summary>
+<details> 
+<summary><strong>project.json (extending build options)</strong></summary>
 <br />
 
-**Why?** Nx needs to know where build-package executor writes its artefacts.
+```jsonc
+{
+  "targets": {
+    "build": {
+      "executor": "nx-simple:build",
+      "options": {
+        "entry": ["index.ts", "utils.ts"],
+        "assets": ["data.json"]
+      }
+    },
+    "package": {
+      "executor": "nx-simple:package",
+      "options": {
+        "extends": "build", // 👈 extend the build target's options
+        "distribution": "npm",
+        "targetRuntime": "es2018"
+      }
+    }
+  }
+}
+```
 
-**How?** Assuming internal packages are created using a `build` target, and external using a `prepublish` target, you would need the following configuration:
+</details>
+
+<details>
+<summary><strong>project.json (of published dependencies)</strong></summary>
+<br />
 
 ```jsonc
-// nx.json
+{
+  // nx-simple will treat this package as external
+  "targets": {
+    "publish": {
+      "executor": "any-executor"
+    }
+  },
+  // if not publishing using an exector, add this flag
+  "willPublish": true
+}
+```
+
+</details>
+
+<details>
+<summary><strong>tsconfig.base.json</strong></summary>
+<br />
+
+```jsonc
+// When analysing source files, Nx needs to be told how to resolve dependencies.
+// Note: that these are only required to build the Nx graph.
+// With NPM workspaces configured, types are resolving direclty from local packages in node_modules.
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@scope/mylib/*": "packages/mylib/*"
+    }
+  }
+}
+```
+
+</details>
+
+<details id="nx-json"> 
+<summary><strong>nx.json</strong></summary>
+<br />
+
+```jsonc
 {
   "namedInputs": {
     "default": ["{projectRoot}/**/*"]
@@ -76,60 +119,45 @@ The resulting package strcuture is optimised for compabatibility with CommonJS a
       ],
       "dependsOn": ["^nx-simple:package", "publish"]
     }
-  }
 }
 ```
 
 </details>
 
-<details>
-<summary><strong>2. Nx is configured to detect dependencies</strong></summary>
-<br />
+## Executor Options
 
-**Why?** When analysing source files, Nx needs to be told how to resolve dependencies.
+| Param           | Type                         | Description                                                               | Default                |
+| --------------- | ---------------------------- | ------------------------------------------------------------------------- | ---------------------- |
+| `extends`       | `string`                     | a sibling target from which to inherit options                            | undefined              |
+|                 |                              |                                                                           |                        |
+| `distribution`  | `"npm"`                      | creates a distribution that can be published to NPM                       | required               |
+| `distribution`  | `"app"`                      | creates a distributon that can be installed                               | required               |
+| `distribution`  | `"lib"`                      | creates a distribution layer that can be packaged in another distribution | required               |
+|                 |                              |                                                                           |                        |
+| `entry`         | `string`                     | the package's entry module                                                | `{tsBaseUrl}/index.ts` |
+| `entry`         | `string[]`                   | an array of entry modules                                                 |                        |
+| `entry`         | `{ string: string }`         | mapping between import paths and entry points                             |                        |
+|                 |                              |                                                                           |                        |
+| `assets`        | `string[]`                   | any files to copy to the build folder                                     | `[]`                   |
+| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | the target JavaScript environment                                         | `"es2020"`             |
 
-**How?** Add path mappings to tsconfig.base.json.
+Notes:
 
-```jsonc
-// tsconfig.base.json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@scope/mylib/*": "packages/mylib/*"
-    }
-  }
-}
-```
+1. All paths are resolved relative to the project root
+2. Distribution layers are compiled, type checked and cached independently, before being copied into other distributions as a node module.
+3. If a package target is not defined for a non-publishable lib, as a fallback, nx-simple will compile a distribution layer dynamically based on a build executor target. However, this will not benefit from granular caching.
 
-Note: that these are only required to build the Nx graph. When NPM workspaces is configured, the TypeScript compiler will be able to get intellisense by resolving imports to your local packages in node_modules.
+## Project Configuration
 
-</details>
+The executor also reads configuration from these files:
 
-<details>
-<summary><strong>3. Declare publishable packages</strong></summary>
-<br />
+| File            | Param                     | Required | Description                                                           |
+| --------------- | ------------------------- | -------- | --------------------------------------------------------------------- |
+| `tsconfig.json` | `compilerOptions.baseUrl` | yes      | the directory containing source code (within project directory)       |
+| `.swcrc`        | `{}`                      | no       | swc configraution, which may be partially overwritten by the executor |
 
-**Why?** nx-simple needs to know if a proejct will be published.
+## Workspace Configuration
 
-**How?** Add a `publish` target to project.json, or, if publishing outside Nx, set a `willPublish` flag.
-
-```jsonc
-// project.json
-{
-  "targets": {
-    "publish": {
-      "executor": "any-executor"
-    }
-  }
-}
-```
-
-```jsonc
-// project.json
-{
-  "willPublish": true
-}
-```
-
-</details>
+| File      | Param            | Required | Description                                                                         |
+| --------- | ---------------- | -------- | ----------------------------------------------------------------------------------- |
+| `nx.json` | `targetDefaults` | yes      | Inform Nx where the executor writes its artefacts. See [nx.json example](#nx-json). |
