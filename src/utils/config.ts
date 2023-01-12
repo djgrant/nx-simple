@@ -3,7 +3,6 @@ import { randomUUID } from "node:crypto";
 import { ExecutorOptions, ExecutorContext } from "utils/types";
 import ts from "typescript";
 import { getTsConfig } from "./ts";
-import { isPath } from "./path";
 
 const executionId = randomUUID();
 

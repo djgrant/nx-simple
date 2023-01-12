@@ -3,7 +3,7 @@ import fse from "fs-extra";
 import { Config } from "utils/config";
 import { createPackageJson } from "utils/package-json";
 import { runSwc } from "utils/swc";
-import { generateTsDefinitions, getTsConfig } from "utils/ts";
+import { generateTsDefinitions } from "utils/ts";
 import { getSwcPathMappings } from "utils/swc.paths";
 import { copyAssets } from "../../utils/assets";
 
