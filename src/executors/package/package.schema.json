@@ -9,6 +9,7 @@
   "properties": {
     "assets": {
       "type": "array",
+      "description": "Any assets to include in the package (relative to project root)",
       "default": [],
       "items": {
         "type": "string"
@@ -20,9 +21,30 @@
       "enum": ["lib", "npm", "app"]
     },
     "entry": {
+      "description": "Package entry point or points",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Single entry point (relative to project root)"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Array of entry points (relative to project root)"
+          }
+        },
+        {
+          "type": "object",
+          "description": "Map between import paths (relative to compiled package.json) and entry points (relative to project root)"
+        }
+      ],
+      "default": "{baseDir}/index.ts"
+    },
+    "extends": {
       "type": "string",
-      "description": "Package entry module",
-      "default": "index.ts"
+      "description": "Inherit options from another Nx target in this project",
+      "default": "es2020"
     },
     "targetRuntime": {
       "type": "string",

@@ -15,9 +15,25 @@
       }
     },
     "entry": {
-      "type": "string",
-      "description": "Package entry module",
-      "default": "index.ts"
+      "description": "Package entry point or points",
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Single entry point (relative to project root)"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Array of entry points (relative to project root)"
+          }
+        },
+        {
+          "type": "object",
+          "description": "Map between import paths (relative to compiled package.json) and entry points (relative to project root)"
+        }
+      ],
+      "default": "{baseDir}/index.ts"
     },
     "targetRuntime": {
       "type": "string",
