@@ -4,8 +4,8 @@ import fse from "fs-extra";
 import { isPath } from "./path";
 
 type PathMappingOptions = {
-  tsConfig: ts.ParsedCommandLine;
   srcDir: string;
+  tsConfig: ts.ParsedCommandLine;
 };
 export async function getSwcPathMappings(opts: PathMappingOptions) {
   const tsBasePath = opts.tsConfig.options.baseUrl!;

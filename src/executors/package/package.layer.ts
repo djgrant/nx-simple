@@ -18,7 +18,7 @@ export async function buildLayer(cfg: Config) {
   await createPackageJson({
     projectDir: cfg.projectDir,
     outDir: tmpOutDir,
-    entry: cfg.entryRelativeToSrcDir,
+    entry: cfg.entryRelativeToBaseDir,
   });
 
   // 3. Typecheck and generate type definitions
@@ -44,8 +44,8 @@ export async function buildLayer(cfg: Config) {
 
   // 4. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    tsConfig: cfg.tsConfig,
     srcDir: cfg.projectBaseDir,
+    tsConfig: cfg.tsConfig,
   });
 
   // 5. Compile source files

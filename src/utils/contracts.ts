@@ -33,7 +33,7 @@ export async function validateProjectPackageJson(cfg: Config) {
   }
 
   // 2. Errors
-  const mainField = `dist/${noExt(cfg.entryRelativeToSrcDir)}.js`;
+  const mainField = `dist/${noExt(cfg.entryRelativeToBaseDir)}.js`;
 
   if (!packageJson.main || packageJson.main !== mainField) {
     throw new Error(

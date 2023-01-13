@@ -22,8 +22,8 @@ export default async function buildExecutor(
 
   // 3. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    tsConfig: cfg.tsConfig,
     srcDir: cfg.projectBaseDir,
+    tsConfig: cfg.tsConfig,
   });
 
   // 4. Compile to ESM

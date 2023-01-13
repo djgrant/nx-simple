@@ -92,7 +92,7 @@ export async function appOrNpmPackageExecutor(
   await createPackageJson({
     projectDir: cfg.projectDir,
     outDir: tmpOutDir,
-    entry: cfg.entryRelativeToSrcDir,
+    entry: cfg.entryRelativeToBaseDir,
     publishedDependencies: deps.published,
   });
 

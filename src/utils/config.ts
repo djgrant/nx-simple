@@ -8,7 +8,6 @@ const executionId = randomUUID();
 
 const defaultOptions = {
   assets: [],
-  entry: "index.ts",
   targetRuntime: "es2020",
 };
 
@@ -33,8 +32,11 @@ export function getConfig(
 
   const projectDistDir = path.join(projectDir, "dist");
 
-  const entryPath = path.join(projectDir, options.entry);
-  const entryRelativeToSrcDir = path.relative(projectBaseDir, entryPath);
+  const entryPath = options.entry
+    ? path.join(projectDir, options.entry)
+    : path.join(projectBaseDir, "index.ts");
+
+  const entryRelativeToBaseDir = path.relative(projectBaseDir, entryPath);
   const entryRelativeToProjectDir = options.entry;
 
   const workspaceDistDir = path.join(context.root, "dist");
@@ -46,7 +48,7 @@ export function getConfig(
     ...options,
     entryPath,
     entryRelativeToProjectDir,
-    entryRelativeToSrcDir,
+    entryRelativeToBaseDir,
     projectName,
     projectDir,
     projectBaseDir,
