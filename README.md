@@ -16,7 +16,7 @@ The plugin aims to achieve a predictable and cohesive development experience by 
 
 ### [nx-simple:build →](./src/executors/build/README.md)
 
-> Compiles and packages TypeScript projects for internal use within a monorepo.
+> Compiles and packages TypeScript projects for consumption by other build tools, bundlers and dev servers e.g. ts-node, vite, esbuild etc.
 
 ### [nx-simple:package →](./src/executors/package/README.md)
 
@@ -42,12 +42,14 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 #### Why does the executor not bundle packages?
 
 1. Now that ES modules are widely available, a good starting point is not to bundle
-2. Bundling adds extra complexity, both in the implementation and for the user, when determining things like how to handle rewriting import.meta.url
+2. Bundling adds extra complexity, both in the implementation and for the user, when determining how to resolve context misalignments
 3. There are great tools out there for bundling when it's required, and the packages that the [build executor](./src/executors/build/README.md) produces can be consumed by bundlers just as they would consume any regular package in node_modules
 
 ## Roadmap
 
-- Error if project does not have a package.json
-- Multiple entry points
-- Accept compatible SWC options https://swc.rs/docs/usage/cli#options
-- Accept option to specify what to do with non-publishable dependencies – error, skip, package by extending nx-simple:build, look for built modules in some search paths
+- Accept SWC options https://swc.rs/docs/usage/cli#options either via options of path to swcrc
+- Accept option to specify what to do with non-publishable dependencies – error, skip, build subpackage, look for built modules in some search paths
+- Provide package.json#exports [fallback strategies](https://github.com/andrewbranch/example-subpath-exports-ts-compat)
+- Warn if subpackage executor has different target runtime to parent package
+- Solution for copying assets. Possibly copy files defined in package.json#files and follow npm's [inclusion/exclusion rules](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#files).
+- Watch mode

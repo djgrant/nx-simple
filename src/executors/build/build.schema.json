@@ -7,34 +7,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "assets": {
-      "type": "array",
-      "default": [],
-      "items": {
-        "type": "string"
-      }
-    },
-    "entry": {
-      "description": "Package entry point or points",
-      "oneOf": [
-        {
-          "type": "string",
-          "description": "Single entry point (relative to project root)"
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "description": "Array of entry points (relative to project root)"
-          }
-        },
-        {
-          "type": "object",
-          "description": "Map between import paths (relative to compiled package.json) and entry points (relative to project root)"
-        }
-      ],
-      "default": "{baseDir}/index.ts"
-    },
     "targetRuntime": {
       "type": "string",
       "description": "The target runtime environment",

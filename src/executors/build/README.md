@@ -1,6 +1,6 @@
 # nx-simple:build
 
-Compiles and packages TypeScript projects for internal use within a monorepo.
+Compiles and packages TypeScript projects for consumption by other build tools, bundlers and dev servers e.g. ts-node, vite, esbuild etc.
 
 - Creates an importable package in `{projectRoot}/dist`
 - Generates source maps
@@ -20,7 +20,6 @@ Compiles and packages TypeScript projects for internal use within a monorepo.
       "executor": "nx-simple:build",
       "options": {
         "entry": "index.ts",
-        "assets": [],
         "targetRuntime": "es2020"
       }
     }
@@ -30,33 +29,30 @@ Compiles and packages TypeScript projects for internal use within a monorepo.
 
 </details>
 
-<details> 
+<details open> 
+<summary><strong>package.json</strong></summary>
+<br />
+
+```jsonc
+{
+  "type": "module",
+  "exports": {
+    "types": "src/index.ts", // 👈 typescript file entry point – enables intellisense to resolve module
+    "import": "dist/index.js" // 👈 path to compiled file – enables build tools to resolve module
+  }
+}
+```
+
+</details>
+
+<details open> 
 <summary ><strong>tsconfig.json</strong></summary>
 <br />
 
 ```jsonc
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "baseUrl": "." } // 👈 tells nx-simple where source files are based
-}
-```
-
-</details>
-
-<details> 
-<summary id="package-json-project"><strong>package.json</strong></summary>
-<br />
-
-```jsonc
-{
-  "type": "module",
-
-  // Setting `main` to match the compiled entry point ensures that build tools that encounter this package should resolve imports to the compiled code.
-  "main": "dist/index.js",
-
-  // Setting `types` to the entry module enables intellisense and features like "Go to definition" to navigate to source files.
-  // Note: this works even if it's a regular TypeScript file. (The package executor replaces this field with a reference to a .d.ts file).
-  "types": "index.ts"
+  "compilerOptions": { "baseUrl": "src" } // 👈 tells nx-simple where source files are located
 }
 ```
 
@@ -98,18 +94,9 @@ Compiles and packages TypeScript projects for internal use within a monorepo.
 
 ## Executor Options
 
-| Param           | Type                         | Description                                   | Default                |
-| --------------- | ---------------------------- | --------------------------------------------- | ---------------------- |
-| `entry`         | `string`                     | the package's entry module                    | `{tsBaseUrl}/index.ts` |
-| `entry`         | `string[]`                   | an array of entry modules                     |                        |
-| `entry`         | `{ string: string }`         | mapping between import paths and entry points |                        |
-|                 |                              |                                               |                        |
-| `assets`        | `string[]`                   | any files to copy to the build folder         | `[]`                   |
-| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | the target JavaScript environment             | `"es2020"`             |
-
-Notes:
-
-1. All paths are resolved relative to the project root
+| Param           | Type                         | Description                       | Default    |
+| --------------- | ---------------------------- | --------------------------------- | ---------- |
+| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | the target JavaScript environment | `"es2020"` |
 
 ## Project Configuration
 
