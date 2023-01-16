@@ -4,17 +4,18 @@ import { validateConfig, validateProjectPackageJson } from "utils/contracts";
 import { runSwc } from "utils/swc";
 import { getSwcPathMappings } from "utils/swc.paths";
 import { copyAssets } from "../../utils/assets";
-import { Options, Context } from "./build.types";
+import { BuildOptions, Context } from "./build.types";
 
 export default async function buildExecutor(
-  options: Options,
+  options: BuildOptions,
   context: Context
 ) {
-  const cfg = getConfig(options, context);
+  // 0. Set up
+  const cfg = await getConfig(options, context);
 
-  // 1. Validate project is setup correctly
+  // 1. Validate project is configured correctly
   validateConfig(cfg);
-  await validateProjectPackageJson(cfg);
+  await validateProjectPackageJson(cfg, { requireExports: false });
 
   // 2. Clean slate
   await fse.remove(cfg.projectDistDir);
@@ -45,7 +46,10 @@ export default async function buildExecutor(
   }
 
   // 5. Copy assets
-  await copyAssets(cfg, { outDir: cfg.projectDistDir });
+  await copyAssets(cfg, {
+    outDir: cfg.projectDistDir,
+    outBaseDirs: [cfg.projectDistDir],
+  });
 
   return { success: true };
 }

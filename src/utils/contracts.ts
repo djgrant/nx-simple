@@ -1,7 +1,6 @@
-import fse from "fs-extra";
 import { ProjectGraphProjectNode, TargetConfiguration } from "@nrwl/devkit";
 import { Config } from "./config";
-import { isPath, noExt } from "./path";
+import { isPath } from "./path";
 
 export function validateConfig(cfg: Config) {
   const baseUrlInProjectDir = !isPath(cfg.projectBaseDir).parentOf(
@@ -14,32 +13,28 @@ export function validateConfig(cfg: Config) {
   }
 }
 
-export async function validateProjectPackageJson(cfg: Config) {
-  const packageJson = await fse.readJSON(`${cfg.projectDir}/package.json`);
+export async function validateProjectPackageJson(
+  packageJson: Record<string, any>,
+  opts: { requireExports: boolean }
+) {
+  if (opts.requireExports) {
+    if (!packageJson.main || packageJson.exports) {
+      throw new Error("package.json must contain a main or exports field");
+    }
 
-  // 1. Warnings
-  // todo: handle paths ending in "." or "./"
-  const typesFile = cfg.entryRelativeToProjectDir;
-  const typesFileName = noExt(typesFile);
+    if (!packageJson.exports && !packageJson.types) {
+      throw new Error("package.json must contain a types field ");
+    }
 
-  const validTypeFields: (string | undefined)[] = [typesFile, typesFileName];
-
-  if (typesFileName === "index") validTypeFields.push(undefined);
-
-  if (!validTypeFields.includes(packageJson.types)) {
-    console.warn(
-      `[WARNING] ${cfg.projectName} package.json "types" field does not point to the entry module. Set it to ${cfg.entryPath} to get intellisense support in your IDE.`
-    );
+    if (
+      !packageJson.exports.types ||
+      !Object.values(packageJson.exports).every((exp: any) => exp.types)
+    ) {
+      throw new Error("All package.json exports must contain a types field");
+    }
   }
 
-  // 2. Errors
-  const mainField = `dist/${noExt(cfg.entryRelativeToBaseDir)}.js`;
-
-  if (!packageJson.main || packageJson.main !== mainField) {
-    throw new Error(
-      `${cfg.projectName} package.json "main" field should point to ${mainField}".`
-    );
-  }
+  // todo validate exports point to actual files
 }
 
 export function projectIsPackagableLib(node?: ProjectGraphProjectNode) {

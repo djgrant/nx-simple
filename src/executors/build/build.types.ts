@@ -1,4 +1,7 @@
-import { ExecutorContext, ExecutorOptions } from "utils/types";
+import { ExecutorContext } from "utils/types";
 
-export type Options = ExecutorOptions;
+export type BuildOptions = {
+  targetRuntime?: string;
+};
+
 export type Context = ExecutorContext;

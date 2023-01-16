@@ -6,49 +6,50 @@ import { runSwc } from "utils/swc";
 import { generateTsDefinitions } from "utils/ts";
 import { getSwcPathMappings } from "utils/swc.paths";
 import { copyAssets } from "../../utils/assets";
+import { PackageOptions } from "./package.types";
 
-export async function buildLayer(cfg: Config) {
-  const tmpOutDir = path.join(cfg.tmpLayersDir, cfg.projectName);
+export async function buildLayer(cfg: Config<PackageOptions>) {
+  const tmpDir = path.join(cfg.tmpLayersDir, cfg.projectName);
+  const tmpDistDir = path.join(tmpDir, "dist");
+  const tmpDistCjsDir = path.join(tmpDir, "dist-cjs");
   const outDir = path.join(cfg.layersDir, cfg.projectName);
 
-  // 1. Create tmp output directory
-  await fse.ensureDir(tmpOutDir);
+  // 0. Set up
+  await fse.ensureDir(tmpDir);
+  await fse.ensureDir(outDir);
 
-  // 2. Create package.json
-  await createPackageJson({
-    projectDir: cfg.projectDir,
-    outDir: tmpOutDir,
-    entry: cfg.entryRelativeToBaseDir,
+  // 1. Create package.json
+  const generatedPackageJson = await createPackageJson({
+    sourcePackageJson: cfg.packageJson,
   });
 
-  // 3. Typecheck and generate type definitions
-  console.log(`Type checking ${cfg.projectName}...`);
+  await fse.writeJSON(path.join(tmpDir, "package.json"), generatedPackageJson, {
+    spaces: 2,
+  });
 
+  // 2. Typecheck and generate type definitions
+  console.log(`Type checking ${cfg.projectName}...`);
   const typeCheckStart = performance.now();
 
-  const typesValid = generateTsDefinitions(
-    cfg.entryPath,
-    tmpOutDir,
-    cfg.tsConfig
-  );
+  const typesDir = path.join(tmpDir, "types");
+  const typesValid = generateTsDefinitions(cfg.tsConfig, typesDir);
 
-  if (!typesValid) {
-    throw new Error(
-      `Could not build layer ${cfg.projectName} because type check failed`
-    );
-  }
+  if (!typesValid) throw new Error("Type check failed");
 
-  const typeCheckDuration = (performance.now() - typeCheckStart).toFixed(2);
+  await fse.copy(typesDir, tmpDistDir);
+  await fse.copy(typesDir, tmpDistCjsDir);
+  await fse.rm(typesDir, { recursive: true });
 
-  console.log(`Type check passed in (${typeCheckDuration}ms)`);
+  const tscDuration = (performance.now() - typeCheckStart).toFixed(2);
+  console.log(`Types checked and .d.ts files generated in (${tscDuration}ms)`);
 
-  // 4. Calculate path mappings
+  // 3. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
     srcDir: cfg.projectBaseDir,
     tsConfig: cfg.tsConfig,
   });
 
-  // 5. Compile source files
+  // 4. Compile source files
   console.log(`Compiling ${cfg.projectName}...`);
 
   const baseSwcConfig = {
@@ -64,40 +65,37 @@ export async function buildLayer(cfg: Config) {
   await Promise.all([
     runSwc({
       ...baseSwcConfig,
-      outDir: path.join(tmpOutDir, "esm"),
+      outDir: tmpDistDir,
       moduleType: "es6",
       ignoreDir: cfg.projectDistDir,
     }),
     runSwc({
       ...baseSwcConfig,
-      outDir: path.join(tmpOutDir, "cjs"),
+      outDir: tmpDistCjsDir,
       moduleType: "commonjs",
       ignoreDir: cfg.projectDistDir,
     }),
   ]);
 
-  // 6. Create package.json files to specify module type
+  // 5. Create package.json files to specify module type
   await fse.writeJson(
-    path.join(tmpOutDir, "cjs", "package.json"),
-    { type: "commonjs" },
+    path.join(tmpDistDir, "package.json"),
+    { type: "module" },
     { spaces: 2 }
   );
 
   await fse.writeJson(
-    path.join(tmpOutDir, "esm", "package.json"),
-    { type: "module" },
+    path.join(tmpDistCjsDir, "package.json"),
+    { type: "commonjs" },
     { spaces: 2 }
   );
 
   // 6. Copy assets
   await copyAssets(cfg, {
-    outDir: tmpOutDir,
-    baseDirOutDirs: ["esm", "cjs"].map((f) => path.join(tmpOutDir, f)),
+    outDir: tmpDir,
+    outBaseDirs: [tmpDistDir, tmpDistCjsDir],
   });
 
-  // 7. Move artefacts to cacheable folder
-  await fse.move(tmpOutDir, outDir, { overwrite: true });
-
-  // 8. Cleanup
-  await fse.remove(tmpOutDir);
+  // 7. Copy artefacts to cacheable folder
+  await fse.copy(tmpDir, outDir);
 }

@@ -1,28 +1,25 @@
 import path from "node:path";
+import fse from "fs-extra";
 import { randomUUID } from "node:crypto";
-import { ExecutorOptions, ExecutorContext } from "utils/types";
-import ts from "typescript";
+import { ExecutorContext } from "utils/types";
 import { getTsConfig } from "./ts";
 
 const executionId = randomUUID();
 
 const defaultOptions = {
-  assets: [],
   targetRuntime: "es2020",
 };
 
-export type Config = ReturnType<typeof getConfig>;
-ts;
-export function getConfig(
-  userOptions: ExecutorOptions,
-  context: ExecutorContext
-) {
+export type Config<T = unknown> = Awaited<ReturnType<typeof getConfig<T>>>;
+
+export async function getConfig<T>(userOptions: T, context: ExecutorContext) {
   const options = { ...defaultOptions, ...userOptions };
   const projectName = context.projectName;
   const project = context.workspace.projects[context.projectName]!;
   const projectDir = path.join(context.root, project.root);
 
   const tsConfig = getTsConfig(projectDir);
+  const packageJson = await fse.readJSON(`${projectDir}/package.json`);
 
   const projectBaseDir = tsConfig.options.baseUrl;
 
@@ -32,13 +29,6 @@ export function getConfig(
 
   const projectDistDir = path.join(projectDir, "dist");
 
-  const entryPath = options.entry
-    ? path.join(projectDir, options.entry)
-    : path.join(projectBaseDir, "index.ts");
-
-  const entryRelativeToBaseDir = path.relative(projectBaseDir, entryPath);
-  const entryRelativeToProjectDir = options.entry;
-
   const workspaceDistDir = path.join(context.root, "dist");
   const tmpDir = path.join(context.root, "tmp", executionId);
   const tmpLayersDir = path.join(tmpDir, ".nxsimple");
@@ -46,9 +36,7 @@ export function getConfig(
 
   return {
     ...options,
-    entryPath,
-    entryRelativeToProjectDir,
-    entryRelativeToBaseDir,
+    packageJson,
     projectName,
     projectDir,
     projectBaseDir,

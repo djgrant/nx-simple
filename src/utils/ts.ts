@@ -1,17 +1,17 @@
 import ts from "typescript";
 
 export function generateTsDefinitions(
-  entry: string,
-  publishDir: string,
-  tsConfig: ts.ParsedCommandLine | null
+  tsConfig: ts.ParsedCommandLine,
+  outDir: string
 ) {
   const program = ts.createProgram({
-    rootNames: [entry],
+    rootNames: tsConfig.fileNames,
     options: {
       ...(tsConfig?.options || {}),
       declaration: true,
+      declarationDir: outDir,
       emitDeclarationOnly: true,
-      declarationDir: `${publishDir}/esm`,
+      rootDir: tsConfig.options.baseUrl,
     },
   });
 

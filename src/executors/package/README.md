@@ -5,7 +5,7 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
 - Creates a publishable package to `{workspaceRoot}/dist/{projectName}`
 - Contains ESM and CJS builds
 - Generates a `package.json` with `main`, `module`, `exports` and `dependencies` fields
-- Copies README, LICENSE, LICENCE files
+- Copies files in baseUrl, as well as README, LICENSE, and LICENCE files
 - Uses `{projectRoot}.swcrc` as base SWC config, if present
 - Generates SWC path mappings based on tsconfig `baseUrl` & `paths`
 - Type checks project using nearest `tsconfig.json`

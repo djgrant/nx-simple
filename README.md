@@ -52,4 +52,5 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 - Provide package.json#exports [fallback strategies](https://github.com/andrewbranch/example-subpath-exports-ts-compat)
 - Warn if subpackage executor has different target runtime to parent package
 - Solution for copying assets. Possibly copy files defined in package.json#files and follow npm's [inclusion/exclusion rules](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#files).
+- SWC helper
 - Watch mode

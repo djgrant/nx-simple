@@ -17,11 +17,7 @@ Compiles and packages TypeScript projects for consumption by other build tools, 
 {
   "targets": {
     "build": {
-      "executor": "nx-simple:build",
-      "options": {
-        "entry": "index.ts",
-        "targetRuntime": "es2020"
-      }
+      "executor": "nx-simple:build"
     }
   }
 }

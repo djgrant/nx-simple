@@ -1,36 +1,68 @@
-import fse from "fs-extra";
 import type { ProjectGraphExternalNode } from "@nrwl/devkit";
 import { getPackageName, getVersion, NxSimpleNode } from "./nx.deps";
-import { noExt } from "./path";
 
 type DependencyNode = NxSimpleNode | ProjectGraphExternalNode;
 
 type Opts = {
-  projectDir: string;
-  outDir: string;
-  entry: string;
+  sourcePackageJson: Record<string, any>;
   publishedDependencies?: DependencyNode[];
 };
 
+// ensure main is relative path
+const distRelativeRe = [/^dist\//, "./dist/"];
+const distToDistCjsRe = [/^(\.\/)?dist\//, "./dist-cjs/"];
+
 export async function createPackageJson(opts: Opts) {
-  const packageJson = await fse.readJSON(`${opts.projectDir}/package.json`);
-  const entryNoExt = noExt(opts.entry);
+  const packageJson = { ...opts.sourcePackageJson };
+  const exportMap: Record<string, { import: string; require: string }> = {};
 
-  packageJson.main = `./cjs/${entryNoExt}.js`;
-  packageJson.module = `./esm/${entryNoExt}.js`;
-  packageJson.types = `./esm/${entryNoExt}.d.ts`;
-  packageJson.dependencies = {};
+  // 1. Strip fields
+  delete packageJson.type; // defined in dist directories
+  delete packageJson.types; // types are resolved by adjacent .d.ts
+  delete packageJson.devDependencies; // non-prod field
 
-  packageJson.exports = {
-    ".": {
+  // 2. Remap main field
+  if (packageJson.main) {
+    packageJson.module = packageJson.main.replace(...distRelativeRe);
+    packageJson.main = packageJson.main.replace(...distToDistCjsRe);
+    exportMap["."] = {
       require: packageJson.main,
-      default: packageJson.module,
-      types: packageJson.types,
-    },
-  };
+      import: packageJson.module,
+    };
+  }
 
-  delete packageJson.type;
-  delete packageJson.devDependencies;
+  // 3. Remap exports
+  if (packageJson.exports) {
+    for (const subpath of Object.keys(packageJson.exports)) {
+      const exportDef = packageJson.exports[subpath];
+      const importPath = exportDef.import || exportDef.default;
+
+      if (!importPath) {
+        throw new Error(
+          `Export ${subpath} for package ${packageJson.name} does not have an import or default property`
+        );
+      }
+
+      exportMap[subpath] = {
+        import: importPath,
+        require: importPath.replace(...distToDistCjsRe),
+      };
+    }
+
+    const mainExport = exportMap["."];
+
+    if (mainExport) {
+      packageJson.main = mainExport.require;
+      packageJson.module = mainExport.import;
+    }
+  }
+
+  if (Object.keys(exportMap).length) {
+    packageJson.exports = exportMap;
+  }
+
+  // 4. Resolve dependencies
+  packageJson.dependencies = {};
 
   const isPeerDep = (v: string) =>
     (packageJson.peerDependencies || []).includes(v);
@@ -44,7 +76,5 @@ export async function createPackageJson(opts: Opts) {
     }
   }
 
-  await fse.writeJSON(`${opts.outDir}/package.json`, packageJson, {
-    spaces: 2,
-  });
+  return packageJson;
 }

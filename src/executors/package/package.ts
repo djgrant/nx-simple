@@ -3,12 +3,15 @@ import fse from "fs-extra";
 import { getConfig } from "utils/config";
 import { createPackageJson } from "utils/package-json";
 import { getProjectDependencies } from "utils/nx.deps";
-import { Options, Context } from "./package.types";
+import { PackageOptions, Context } from "./package.types";
 import { buildLayer } from "./package.layer";
-import { validateConfig } from "../../utils/contracts";
+import {
+  validateConfig,
+  validateProjectPackageJson,
+} from "../../utils/contracts";
 
 export default async function packageExecutor(
-  options: Options,
+  options: PackageOptions,
   context: Context
 ) {
   switch (options.distribution) {
@@ -17,21 +20,50 @@ export default async function packageExecutor(
       return appOrNpmPackageExecutor(options, context);
 
     case "lib":
-      throw new Error("No yet implemented");
+      return libPackageExecutor(options, context);
   }
 }
 
-export async function appOrNpmPackageExecutor(
-  options: Options,
+export async function libPackageExecutor(
+  options: PackageOptions,
   context: Context
 ) {
-  const cfg = getConfig(options, context);
+  // 0. Set up
+  const cfg = await getConfig(options, context);
+  process.on("exit", () => fse.removeSync(cfg.tmpDir));
+
+  // 1. Validate project is setup correctly
+  validateConfig(cfg);
+  await validateProjectPackageJson(cfg, { requireExports: true });
+
+  // 3. Compile current layer
+  console.log(`Building layer for ${context.projectName}...`);
+  await buildLayer(cfg);
+
+  return { success: true };
+}
+
+export async function appOrNpmPackageExecutor(
+  options: PackageOptions,
+  context: Context
+) {
+  // 0. Set up
+  const cfg = await getConfig(options, context);
   const outDir = path.join(cfg.workspaceDistDir, context.projectName);
   const layerDir = path.join(cfg.layersDir, context.projectName);
   const tmpOutDir = path.join(cfg.tmpDir, context.projectName);
 
+  await fse.ensureDir(outDir);
+  await fse.ensureDir(tmpOutDir);
+
+  process.on("exit", () => fse.removeSync(cfg.tmpDir));
+
   // 1. Validate project is setup correctly
   validateConfig(cfg);
+
+  await validateProjectPackageJson(cfg, {
+    requireExports: options.distribution === "npm",
+  });
 
   // 2. Get project dependencies
   const deps = await getProjectDependencies(
@@ -52,16 +84,9 @@ export async function appOrNpmPackageExecutor(
       for (const dep of deps.unpublished) {
         // 4a. Build sub package programatically if project does not have a package executor
         if (!dep.packagable) {
-          // Not publishable or packagable, so build executor will exist
-          const targets = Object.values(dep.data.targets!);
-          const buildTarget = targets.find(
-            (t) => t.executor === "nx-simple:build"
-          )!;
-
           // Construct config based on dep's buildable executor and this executor's targetRuntime
-          const layerConfig = getConfig(
+          const layerConfig = await getConfig(
             {
-              ...buildTarget.options,
               targetRuntime: cfg.targetRuntime,
               distribution: "lib" as const,
             },
@@ -76,10 +101,20 @@ export async function appOrNpmPackageExecutor(
         }
 
         // 4b. Copy dependency layer to current layer
-        for (const fmt of ["cjs", "esm"]) {
+        for (const distDir of ["dist", "dist-cjs"]) {
           const src = path.join(cfg.layersDir, dep.name);
-          const dest = path.join(tmpOutDir, fmt, "node_modules", dep.name);
-          await fse.copy(src, dest);
+          const outDir = path.join(
+            tmpOutDir,
+            distDir,
+            "node_modules",
+            dep.name
+          );
+          const outDirUnusedDist = path.join(
+            outDir,
+            distDir === "dist" ? "dist-cjs" : "dist"
+          );
+          await fse.copy(src, outDir);
+          await fse.rm(outDirUnusedDist, { recursive: true });
         }
       }
     } catch (err) {
@@ -89,18 +124,19 @@ export async function appOrNpmPackageExecutor(
   }
 
   // 5. Create package.json
-  await createPackageJson({
-    projectDir: cfg.projectDir,
-    outDir: tmpOutDir,
-    entry: cfg.entryRelativeToBaseDir,
+  const generatedPackageJson = await createPackageJson({
+    sourcePackageJson: cfg.packageJson,
     publishedDependencies: deps.published,
   });
 
+  await fse.writeJSON(
+    path.join(tmpOutDir, "package.json"),
+    generatedPackageJson,
+    { spaces: 2 }
+  );
+
   // 6. Move to publish directory
   await fse.move(tmpOutDir, outDir, { overwrite: true });
-
-  // 7. Cleanup
-  await fse.remove(cfg.tmpDir);
 
   return { success: true };
 }

@@ -7,6 +7,6 @@ export function noExt(p: string) {
 
 export const isPath = (_path: string) => ({
   parentOf: (child: string) => {
-    return _path.split(path.sep) < child.split(path.sep);
+    return _path.split(path.sep) < path.dirname(child).split(path.sep);
   },
 });

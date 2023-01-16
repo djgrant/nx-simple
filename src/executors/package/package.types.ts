@@ -1,7 +1,8 @@
-import { ExecutorContext, ExecutorOptions } from "utils/types";
+import { ExecutorContext } from "utils/types";
 
-export type Options = ExecutorOptions & {
+export type PackageOptions = {
   distribution: "lib" | "npm" | "app";
+  targetRuntime?: string;
 };
 
 export type Context = ExecutorContext;
