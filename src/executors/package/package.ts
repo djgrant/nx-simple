@@ -32,9 +32,12 @@ export async function libPackageExecutor(
   const cfg = await getConfig(options, context);
   process.on("exit", () => fse.removeSync(cfg.tmpDir));
 
+  // 0. Set up cleanup
+  process.on("exit", () => fse.removeSync(cfg.tmpDir));
+
   // 1. Validate project is setup correctly
   validateConfig(cfg);
-  await validateProjectPackageJson(cfg, { requireExports: true });
+  await validateProjectPackageJson(cfg.packageJson, { requireExports: true });
 
   // 3. Compile current layer
   console.log(`Building layer for ${context.projectName}...`);
@@ -136,7 +139,8 @@ export async function appOrNpmPackageExecutor(
   );
 
   // 6. Move to publish directory
-  await fse.move(tmpOutDir, outDir, { overwrite: true });
+  await fse.rm(outDir, { recursive: true });
+  await fse.copy(tmpOutDir, outDir);
 
   return { success: true };
 }

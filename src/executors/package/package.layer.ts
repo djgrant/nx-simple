@@ -97,5 +97,6 @@ export async function buildLayer(cfg: Config<PackageOptions>) {
   });
 
   // 7. Copy artefacts to cacheable folder
+  await fse.rm(outDir, { recursive: true });
   await fse.copy(tmpDir, outDir);
 }

@@ -15,7 +15,7 @@ export default async function buildExecutor(
 
   // 1. Validate project is configured correctly
   validateConfig(cfg);
-  await validateProjectPackageJson(cfg, { requireExports: false });
+  await validateProjectPackageJson(cfg.packageJson, { requireExports: false });
 
   // 2. Clean slate
   await fse.remove(cfg.projectDistDir);

@@ -18,7 +18,8 @@ export async function validateProjectPackageJson(
   opts: { requireExports: boolean }
 ) {
   if (opts.requireExports) {
-    if (!packageJson.main || packageJson.exports) {
+    if (!packageJson.main && !packageJson.exports) {
+      console.log(packageJson);
       throw new Error("package.json must contain a main or exports field");
     }
 
@@ -27,8 +28,9 @@ export async function validateProjectPackageJson(
     }
 
     if (
-      !packageJson.exports.types ||
-      !Object.values(packageJson.exports).every((exp: any) => exp.types)
+      packageJson.exports &&
+      (!packageJson.exports.types ||
+        !Object.values(packageJson.exports).every((exp: any) => exp.types))
     ) {
       throw new Error("All package.json exports must contain a types field");
     }
