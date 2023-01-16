@@ -123,9 +123,9 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
     "package": {
       "dependsOn": ["^package:lib"]
     },
-      "package:lib": {
+    "package:lib": {
       "dependsOn": ["^package:lib"]
-    },
+    }
 }
 ```
 
