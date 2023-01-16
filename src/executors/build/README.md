@@ -79,9 +79,11 @@ Compiles and packages TypeScript projects for consumption by other build tools, 
   "targetDefaults": {
     "nx-simple:build": {
       "inputs": ["default"],
-      "outputs": ["{projectRoot}/dist"],
-      "dependsOn": ["^nx-simple:build"]
+      "outputs": ["{projectRoot}/dist"]
     }
+  },
+  "build": {
+    "dependsOn": ["^build"]
   }
 }
 ```

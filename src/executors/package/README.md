@@ -21,10 +21,30 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
 ```jsonc
 {
   "targets": {
-    "build": {
+    "package": {
       "executor": "nx-simple:package",
       "options": {
         "distribution": "npm",
+        "targetRuntime": "es2018"
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<details> 
+<summary><strong>project.json (unpublished sub-package)</strong></summary>
+<br />
+
+```jsonc
+{
+  "targets": {
+    "package": {
+      "executor": "nx-simple:package",
+      "options": {
+        "distribution": "lib",
         "targetRuntime": "es2018"
       }
     }
@@ -99,8 +119,13 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
         "{workspaceRoot}/dist/.nxsimple/{projectName}",
         "{workspaceRoot}/dist/{projectName}"
       ],
-      "dependsOn": ["^nx-simple:package"]
-    }
+    },
+    "package": {
+      "dependsOn": ["^package:lib"]
+    },
+      "package:lib": {
+      "dependsOn": ["^package:lib"]
+    },
 }
 ```
 
