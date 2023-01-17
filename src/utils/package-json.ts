@@ -57,7 +57,7 @@ export async function createPackageJson(opts: Opts) {
     }
   }
 
-  if (Object.keys(packageJson.exports).length) {
+  if (Object.keys(exportMap).length) {
     packageJson.exports = exportMap;
   }
 

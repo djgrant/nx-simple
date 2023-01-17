@@ -54,3 +54,4 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 - Solution for copying assets. Possibly copy files defined in package.json#files and follow npm's [inclusion/exclusion rules](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#files).
 - SWC helper
 - Watch mode
+- Formalise behaviour around baseUrl being treated as rootUrl

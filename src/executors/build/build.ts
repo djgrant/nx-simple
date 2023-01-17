@@ -3,7 +3,7 @@ import { getConfig } from "utils/config";
 import { validateConfig, validateProjectPackageJson } from "utils/contracts";
 import { runSwc } from "utils/swc";
 import { getSwcPathMappings } from "utils/swc.paths";
-import { copyAssets } from "../../utils/assets";
+import { copyAssets } from "utils/assets";
 import { BuildOptions, Context } from "./build.types";
 
 export default async function buildExecutor(
@@ -23,7 +23,6 @@ export default async function buildExecutor(
 
   // 3. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    srcDir: cfg.projectBaseDir,
     tsConfig: cfg.tsConfig,
   });
 
@@ -31,7 +30,7 @@ export default async function buildExecutor(
   try {
     await runSwc({
       projectDir: cfg.projectDir,
-      srcDir: cfg.projectBaseDir,
+      srcDir: cfg.projectSrcDir,
       outDir: cfg.projectDistDir,
       ignoreDir: cfg.projectDistDir,
       target: cfg.targetRuntime,

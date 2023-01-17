@@ -3,12 +3,9 @@ import { Config } from "./config";
 import { isPath } from "./path";
 
 export function validateConfig(cfg: Config) {
-  const baseUrlInProjectDir = !isPath(cfg.projectBaseDir).parentOf(
-    cfg.projectDir
-  );
-  if (!baseUrlInProjectDir) {
+  if (isPath(cfg.projectSrcDir).parentOf(cfg.projectDir)) {
     throw new Error(
-      `tsconfig baseUrl should not be outside the project directory\n baseUrl: ${cfg.projectBaseDir}\n soureDirectory: ${cfg.projectDir}\n`
+      `tsconfig baseUrl should not be outside the project directory\n baseUrl: ${cfg.projectSrcDir}\n soureDirectory: ${cfg.projectDir}\n`
     );
   }
 }

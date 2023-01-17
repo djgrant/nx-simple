@@ -18,15 +18,14 @@ export async function getConfig<T>(userOptions: T, context: ExecutorContext) {
   const project = context.workspace.projects[context.projectName]!;
   const projectDir = path.join(context.root, project.root);
 
-  const tsConfig = getTsConfig(projectDir);
   const packageJson = await fse.readJSON(`${projectDir}/package.json`);
+  const tsConfig = getTsConfig(projectDir);
 
-  const projectBaseDir = tsConfig.options.baseUrl;
-
-  if (!projectBaseDir) {
+  if (!tsConfig.options.baseUrl) {
     throw new Error("tsconfig.json must have a baseUrl");
   }
 
+  const projectSrcDir = tsConfig.options.baseUrl; // absolute path
   const projectDistDir = path.join(projectDir, "dist");
 
   const workspaceDistDir = path.join(context.root, "dist");
@@ -39,7 +38,7 @@ export async function getConfig<T>(userOptions: T, context: ExecutorContext) {
     packageJson,
     projectName,
     projectDir,
-    projectBaseDir,
+    projectSrcDir,
     projectDistDir,
     workspaceDistDir,
     tmpDir,

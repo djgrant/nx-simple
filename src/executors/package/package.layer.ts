@@ -45,7 +45,6 @@ export async function buildLayer(cfg: Config<PackageOptions>) {
 
   // 3. Calculate path mappings
   const { paths, baseUrl } = await getSwcPathMappings({
-    srcDir: cfg.projectBaseDir,
     tsConfig: cfg.tsConfig,
   });
 
@@ -54,7 +53,7 @@ export async function buildLayer(cfg: Config<PackageOptions>) {
 
   const baseSwcConfig = {
     projectDir: cfg.projectDir,
-    srcDir: cfg.projectBaseDir,
+    srcDir: cfg.projectSrcDir,
     ignoreDir: cfg.projectDistDir,
     target: cfg.targetRuntime,
     sourceMaps: false,
