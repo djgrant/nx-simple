@@ -25,8 +25,8 @@ export async function validateProjectPackageJson(
 
     if (
       packageJson.exports &&
-      (!packageJson.exports.types ||
-        !Object.values(packageJson.exports).every((exp: any) => exp.types))
+      !packageJson.exports.types &&
+      !Object.values(packageJson.exports).every((exp: any) => exp.types)
     ) {
       throw new Error("All package.json exports must contain a types field");
     }
