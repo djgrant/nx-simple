@@ -63,8 +63,12 @@ export function projectIsPublishable(node?: ProjectGraphProjectNode) {
   if (!node.data.targets) return false;
 
   const hasPublishTarget = () =>
-    Object.keys(node.data.targets as any as TargetConfiguration[]).includes(
-      "publish"
+    Object.entries(node.data.targets as any as TargetConfiguration[]).some(
+      ([target, configuration]) => {
+        target === "publish" ||
+          (configuration.executor === "nx-simple:package" &&
+            configuration.options.distribution === "npm");
+      }
     );
 
   return (node.data as any).willPublish || hasPublishTarget();
