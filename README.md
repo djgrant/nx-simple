@@ -55,3 +55,4 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 - SWC helper
 - Watch mode
 - Formalise behaviour around baseUrl being treated as rootUrl
+- Tame coupling between cache config and project name

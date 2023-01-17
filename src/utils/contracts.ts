@@ -16,7 +16,6 @@ export async function validateProjectPackageJson(
 ) {
   if (opts.requireExports) {
     if (!packageJson.main && !packageJson.exports) {
-      console.log(packageJson);
       throw new Error("package.json must contain a main or exports field");
     }
 

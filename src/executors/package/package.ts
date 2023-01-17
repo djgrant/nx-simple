@@ -32,15 +32,11 @@ export async function libPackageExecutor(
   const cfg = await getConfig(options, context);
   process.on("exit", () => fse.removeSync(cfg.tmpDir));
 
-  // 0. Set up cleanup
-  process.on("exit", () => fse.removeSync(cfg.tmpDir));
-
   // 1. Validate project is setup correctly
   validateConfig(cfg);
   await validateProjectPackageJson(cfg.packageJson, { requireExports: true });
 
-  // 3. Compile current layer
-  console.log(`Building layer for ${context.projectName}...`);
+  // 3. Compile package
   await buildLayer(cfg);
 
   return { success: true };
@@ -64,7 +60,7 @@ export async function appOrNpmPackageExecutor(
   // 1. Validate project is setup correctly
   validateConfig(cfg);
 
-  await validateProjectPackageJson(cfg, {
+  await validateProjectPackageJson(cfg.packageJson, {
     requireExports: options.distribution === "npm",
   });
 
@@ -96,7 +92,7 @@ export async function appOrNpmPackageExecutor(
             {
               ...context,
               projectName: dep.name,
-              targetName: "package-lib",
+              targetName: "package:lib",
             }
           );
 
