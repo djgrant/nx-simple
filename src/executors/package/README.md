@@ -109,6 +109,14 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
 
 ```jsonc
 {
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "@nrwl/nx-cloud",
+      "options": {
+        "cacheableOperations": ["build", "package", "package:lib"]
+      }
+    }
+  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*"]
   },
@@ -118,7 +126,7 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
       "outputs": [
         "{workspaceRoot}/dist/.nxsimple/{projectName}",
         "{workspaceRoot}/dist/{projectName}"
-      ],
+      ]
     },
     "package": {
       "dependsOn": ["^package:lib"]
@@ -126,6 +134,7 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
     "package:lib": {
       "dependsOn": ["^package:lib"]
     }
+  }
 }
 ```
 
