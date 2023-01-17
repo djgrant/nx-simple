@@ -10,7 +10,7 @@ export async function copyAssets(
   cfg: Config,
   opts: { outDir: string; outBaseDirs: string[] }
 ) {
-  const defaultFilesRe = /^(readme|licence|license)(|\.[a-z]+)$/i;
+  const defaultFilesRe = /^(readme|licence|license|dockerfile)(|\.[a-z]+)$/i;
   const filePaths = await glob(`${cfg.projectDir}/**/*`, {
     nodir: true,
     ignore: [`${cfg.projectDir}/dist/**/*`],
