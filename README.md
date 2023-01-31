@@ -56,3 +56,5 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 - Watch mode
 - Formalise behaviour around baseUrl being treated as rootUrl
 - Tame coupling between cache config and project name
+- Scope approach for working with package-based repos e.g. lerna and pnpm (no source code analysis, no generated package.json, publishable bundle in package folder)
+- Add `module` exports condition for bundlers e.g. webpack, [esbuild](https://esbuild.github.io/api/#how-conditions-work)
