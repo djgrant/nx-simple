@@ -53,17 +53,6 @@ export async function getProjectDependencies(
       const publishable = projectIsPublishable(node);
       const packagable = projectIsPackagableLib(node);
 
-      if (!publishable && !buildable && !packagable) {
-        throw new Error(
-          [
-            `${node.name} cannot be packaged as a dependency. To resolve, either:`,
-            `1. Inform nx-simple that this project will be published to NPM by adding a "publish" target or set "willPublish" to "true" in project.json`,
-            `2. Add a build target using the executor "nx-simple:build"`,
-            `3. Add package target using the executor "nx-simple:package" and set "distribution" option to "lib"`,
-          ].join("\n")
-        );
-      }
-
       const packageJson = await getProjectPackageJson(node, root);
       const projectNode = {
         ...node,

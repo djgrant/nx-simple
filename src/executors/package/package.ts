@@ -83,7 +83,7 @@ export async function appOrNpmPackageExecutor(
       for (const dep of deps.unpublished) {
         // 4a. Build sub package programatically if project does not have a package executor
         if (!dep.packagable) {
-          // Construct config based on dep's buildable executor and this executor's targetRuntime
+          // Construct config based on this executor's targetRuntime
           const layerConfig = await getConfig(
             {
               targetRuntime: cfg.targetRuntime,
