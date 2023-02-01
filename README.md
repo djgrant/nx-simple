@@ -47,6 +47,7 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 
 ## Roadmap
 
+- Use rootDir instead of baseUrl to direct nx-simple to source files
 - Accept SWC options https://swc.rs/docs/usage/cli#options either via options of path to swcrc
 - Accept option to specify what to do with non-publishable dependencies – error, skip, build subpackage, look for built modules in some search paths
 - Provide package.json#exports [fallback strategies](https://github.com/andrewbranch/example-subpath-exports-ts-compat)
@@ -54,7 +55,8 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 - Solution for copying assets. Possibly copy files defined in package.json#files and follow npm's [inclusion/exclusion rules](https://docs.npmjs.com/cli/v9/configuring-npm/package-json#files).
 - SWC helper
 - Watch mode
-- Formalise behaviour around baseUrl being treated as rootUrl
 - Tame coupling between cache config and project name
 - Scope approach for working with package-based repos e.g. lerna and pnpm (no source code analysis, no generated package.json, publishable bundle in package folder)
 - Add `module` exports condition for bundlers e.g. webpack, [esbuild](https://esbuild.github.io/api/#how-conditions-work)
+- Expolore issues around inherited baseUrl/paths and potentially using project references to solve
+- Fully leverage tsconfig incremental compilation

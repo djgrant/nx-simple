@@ -1,32 +1,22 @@
+import { execSync } from "child_process";
 import ts from "typescript";
+import { spawn } from "./spawn";
 
-export function generateTsDefinitions(
+export async function generateTsDefinitions(
   tsConfig: ts.ParsedCommandLine,
-  outDir: string
+  outDir: string,
+  projectDir: string
 ) {
-  const program = ts.createProgram({
-    rootNames: tsConfig.fileNames,
-    options: {
-      ...(tsConfig?.options || {}),
-      declaration: true,
-      declarationDir: outDir,
-      emitDeclarationOnly: true,
-      rootDir: tsConfig.options.baseUrl,
-    },
+  await spawn({
+    cmd: "tsc",
+    cmdOptions: [
+      "--declaration",
+      "--emitDeclarationOnly",
+      ["--declarationDir", outDir],
+      ["--rootDir", tsConfig.options.baseUrl!],
+    ].flat(),
+    cwd: projectDir,
   });
-
-  let emitResult = program.emit();
-
-  let diagnostics = ts
-    .getPreEmitDiagnostics(program)
-    .concat(emitResult.diagnostics);
-
-  const messages = getTsMessages(diagnostics);
-
-  if (messages.length) {
-    console.error(messages.join("\n"));
-    return false;
-  }
 
   return true;
 }
@@ -47,26 +37,4 @@ export function getTsConfig(projectDir: string) {
   if (tsConfigRaw.error) throw tsConfigRaw.error;
 
   return ts.parseJsonConfigFileContent(tsConfigRaw.config, ts.sys, projectDir);
-}
-
-function getTsMessages(diagnostics: ts.Diagnostic[]) {
-  const msgs: string[] = [];
-  diagnostics.forEach((diagnostic) => {
-    if (diagnostic.file) {
-      let { line, character } = ts.getLineAndCharacterOfPosition(
-        diagnostic.file,
-        diagnostic.start!
-      );
-      let message = ts.flattenDiagnosticMessageText(
-        diagnostic.messageText,
-        "\n"
-      );
-      msgs.push(
-        `${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`
-      );
-    } else {
-      msgs.push(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
-    }
-  });
-  return msgs;
 }

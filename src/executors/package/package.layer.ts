@@ -13,10 +13,12 @@ export async function buildLayer(cfg: Config<PackageOptions>) {
   const tmpDistDir = path.join(tmpDir, "dist");
   const tmpDistCjsDir = path.join(tmpDir, "dist-cjs");
   const outDir = path.join(cfg.layersDir, cfg.projectName);
+  const typesDir = path.join(tmpDir, "types");
 
   // 0. Set up
   await fse.ensureDir(tmpDir);
   await fse.ensureDir(outDir);
+  await fse.ensureDir(typesDir);
 
   // 1. Create package.json
   const generatedPackageJson = await createPackageJson({
@@ -31,8 +33,11 @@ export async function buildLayer(cfg: Config<PackageOptions>) {
   console.log(`Type checking ${cfg.projectName}...`);
   const typeCheckStart = performance.now();
 
-  const typesDir = path.join(tmpDir, "types");
-  const typesValid = generateTsDefinitions(cfg.tsConfig, typesDir);
+  const typesValid = await generateTsDefinitions(
+    cfg.tsConfig,
+    typesDir,
+    cfg.projectDir
+  );
 
   if (!typesValid) throw new Error("Type check failed");
 
