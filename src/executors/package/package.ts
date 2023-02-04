@@ -1,5 +1,6 @@
 import path from "node:path";
 import fse from "fs-extra";
+import { execSync } from "node:child_process";
 import { getConfig } from "utils/config";
 import { createPackageJson } from "utils/package-json";
 import { getProjectDependencies } from "utils/nx.deps";
@@ -38,6 +39,14 @@ export async function libPackageExecutor(
 
   // 3. Compile package
   await buildLayer(cfg);
+
+  // 4. Run postbuild script
+  if (options.postbuild) {
+    await execSync(options.postbuild, {
+      cwd: cfg.projectDistDir,
+      stdio: "inherit",
+    });
+  }
 
   return { success: true };
 }
@@ -137,6 +146,11 @@ export async function appOrNpmPackageExecutor(
   // 6. Move to publish directory
   await fse.rm(outDir, { recursive: true });
   await fse.copy(tmpOutDir, outDir);
+
+  // 7. Run postbuild script
+  if (options.postbuild) {
+    await execSync(options.postbuild, { cwd: outDir, stdio: "inherit" });
+  }
 
   return { success: true };
 }

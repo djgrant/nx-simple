@@ -12,6 +12,10 @@
       "description": "",
       "enum": ["lib", "npm", "app"]
     },
+    "postbuild": {
+      "type": "string",
+      "description": "A command to run in the distribution folder"
+    },
     "targetRuntime": {
       "type": "string",
       "description": "The target runtime environment",
