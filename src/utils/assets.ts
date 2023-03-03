@@ -1,10 +1,7 @@
 import path from "node:path";
-import util from "node:util";
 import fse from "fs-extra";
-import globCb from "glob";
+import glob from "glob";
 import { Config } from "./config";
-
-const glob = util.promisify(globCb);
 
 export async function copyAssets(
   cfg: Config,
