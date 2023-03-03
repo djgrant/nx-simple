@@ -5,8 +5,13 @@
   "version": "0.1.4",
   "executors": "./executors.json",
   "scripts": {
-    "prepare": "swc src -d dist"
+    "prepack": "swc src -d dist"
   },
+  "files": [
+    "dist",
+    "src",
+    "executors.json"
+  ],
   "dependencies": {
     "@nrwl/devkit": "^15.8.3",
     "fs-extra": "^11.1.0",
