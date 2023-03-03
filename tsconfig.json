@@ -1,5 +1,22 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "baseUrl": "src" },
+  "compilerOptions": {
+    "baseUrl": "src",
+    "strict": true,
+    "outDir": "dist",
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  },
   "include": ["src/**/*"]
 }
