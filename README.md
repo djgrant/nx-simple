@@ -1,8 +1,8 @@
 # nx-simple
 
-An Nx plugin that helps you fall into the pit of success.
+A lightweight alternative to [@nrwl/js](https://nx.dev/packages/js).
 
-There are many pitfalls when using monorepos and getting all your tools to work together can be time-consuming. This plugin aims to tame some of the complexity inherent in the JavaScript ecosystem by providing well-defined conventions alongside transparent and lightweight tooling.
+Designed to slot into Nx monorepos and play nicely with other tools and frameworks.
 
 ## Features
 
@@ -18,7 +18,7 @@ There are many pitfalls when using monorepos and getting all your tools to work 
 npm install nx-simple
 ```
 
-## Executors
+## Setup
 
 ### [nx-simple:build →](./src/executors/build/README.md)
 
