@@ -12,6 +12,12 @@ There are many pitfalls when using monorepos and getting all your tools to work 
 - ⚒️ Building of projects for local dev or consumption by other tools
 - 📦 Packaging of projects for deployment and publishing
 
+## Install
+
+```
+npm install nx-simple
+```
+
 ## Executors
 
 ### [nx-simple:build →](./src/executors/build/README.md)
