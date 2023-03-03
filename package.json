@@ -5,7 +5,7 @@
   "version": "0.1.2",
   "executors": "./executors.json",
   "scripts": {
-    "build": "swc src -d dist"
+    "prepare": "swc src -d dist"
   },
   "dependencies": {
     "@nrwl/devkit": "^15.8.3",
