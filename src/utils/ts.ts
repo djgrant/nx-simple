@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import ts from "typescript";
 import { spawn } from "./spawn";
 
