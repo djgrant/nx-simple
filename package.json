@@ -3,7 +3,6 @@
   "license": "MIT",
   "type": "commonjs",
   "version": "0.1.1",
-  "main": "dist/index.js",
   "executors": "./executors.json",
   "scripts": {
     "build": "swc src -d dist"
@@ -14,5 +13,8 @@
     "glob": "^9.2.1",
     "swc": "^1.0.11",
     "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1"
   }
 }
