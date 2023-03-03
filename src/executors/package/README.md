@@ -2,6 +2,8 @@
 
 Compiles and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
 
+## Features
+
 - Creates a publishable package to `{workspaceRoot}/dist/{projectName}`
 - Contains ESM and CJS builds
 - Generates a `package.json` with `main`, `module`, `exports` and `dependencies` fields

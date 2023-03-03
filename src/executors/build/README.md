@@ -2,6 +2,8 @@
 
 Compiles and packages TypeScript projects for consumption by other build tools, bundlers and dev servers e.g. ts-node, vite, esbuild etc.
 
+## Features
+
 - Creates an importable package in `{projectRoot}/dist`
 - Generates source maps
 - Uses `{projectRoot}.swcrc` as base SWC config, if present
