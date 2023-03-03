@@ -2,7 +2,7 @@
   "name": "nx-simple",
   "license": "MIT",
   "type": "commonjs",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "executors": "./executors.json",
   "scripts": {
     "prepack": "swc src -d dist"
