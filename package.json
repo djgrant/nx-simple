@@ -3,7 +3,7 @@
   "name": "nx-simple",
   "license": "MIT",
   "type": "commonjs",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "dist/index.js",
   "executors": "./executors.json",
   "scripts": {
