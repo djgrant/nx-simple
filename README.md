@@ -2,15 +2,17 @@
 
 A lightweight alternative to [@nrwl/js](https://nx.dev/packages/js).
 
-Designed to slot into Nx monorepos and play nicely with other tools and frameworks.
+Designed to slot into Nx monorepos and play nicely with other tools.
 
 ## Features
 
-- 💡 Opinionated setup, optimised for DX
-- 🔗 Compatability with other tools (without needing additional plugins)
-- 📝 Documentation of both implicit and explicit configurations
-- ⚒️ Building of projects for local dev or consumption by other tools
-- 📦 Packaging of projects for deployment and publishing
+- Conventions optimised for an unsurprising developer experience
+- Compatibility with upstream tools (without needing additional plugins)
+- Documentation of both implicit and explicit configurations
+- Automatic remapping of tsconfig baseUrl/paths
+- Generates publishable packages with CJS/ESM support
+
+See also [comparison with `@nrwl/js`](#comparison).
 
 ## Install
 
@@ -18,7 +20,7 @@ Designed to slot into Nx monorepos and play nicely with other tools and framewor
 npm install nx-simple
 ```
 
-## Setup
+## Executor Setup
 
 ### [nx-simple:build →](./src/executors/build/README.md)
 
@@ -27,6 +29,23 @@ npm install nx-simple
 ### [nx-simple:package →](./src/executors/package/README.md)
 
 > Compiles, type checks, and packages TypeScript projects for publication to NPM, deployment as an app, or inclusion within another packagable project.
+
+## Comparison
+
+nx-simple aims to achieve the simplicity of a [package-based repo](https://nx.dev/concepts/integrated-vs-package-based), while retaining some of the power of an [integrated repo](https://nx.dev/concepts/integrated-vs-package-based).
+
+The main difference with [@nrwl/js](https://nx.dev/packages/js) is nx-simple's approach to module resolution. Packages built by nx-simple can be resolved by setting up NPM workspaces, rather than relying on upstream plugins. This simplifies interoperability – if a package exists in node_modules, every bundler, dev server, and test runner will be able to resolve it.
+
+Architecturally, this is enabled by providing two executors:
+
+- A [build executor](./src/executors/build/README.md) for compiling local packages (writes transpiled JavaScript to `{projectRoot}/dist`)
+- A [package executor](./src/executors/package/README.md) for creating external packages optimised for publishing and deployment (creates a new optimised package in `{workspaceRoot}/dist/{projectName}`)
+
+Additional differences:
+
+- **Configuration**. nx-simple opts to rely on user configuration, (`package.json`, `tsconfig.json` and `.swcrc`) to determine its behaviour.
+- **Local dependencies** e.g. a publishable package that imports another local package. nx-simple builds local dependencies in isolation and then copies them to dist/node_modules (see [approach](https://github.com/sveltejs/sapper/issues/551#issue-402728689)). @nrwl/js copies all the source files into a single location, compiles them together, and then updates the imports (see [source code](https://github.com/nrwl/nx/blob/master/packages/js/src/utils/inline.ts#L63-L91)).
+- **Generators**. nx-simple does not provide any generators at present. The focus is rather on transparently documenting all the configurations required to achieve a good DX.
 
 ## Compatibility
 
