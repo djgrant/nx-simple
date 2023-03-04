@@ -49,7 +49,7 @@ Additional differences:
 
 ## Compatibility
 
-nx-simple aims to maximise compatability with other tools in the ecosystem. This table provides an overview of how and why compatability is achieved.
+nx-simple aims to maximise compatibility with other tools in the ecosystem. This table provides an overview of how and why compatibility is achieved.
 
 | Tooling                                             | Setup                                                                                            | Explanation                                                                                                            |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 
 #### Caveats
 
-1. Publishing tools generally assume that the package they version-bump is also the package to be released. The workflow with Nx plugins is slightly different: the source package should be version-bumped, and the built package (in `{workspaceRoot}/dist/{projectName}` should be published.
+1. Publishing tools generally assume that the package they version-bump is also the package to be released. The workflow with Nx plugins is slightly different: the source package is version-bumped, and the built package (in `{workspaceRoot}/dist/{projectName}`) is published.
 
 ## Q&A
 
@@ -75,7 +75,7 @@ nx-simple aims to maximise compatability with other tools in the ecosystem. This
 The package executor generates a package in `{workspaceRoot}/dist/{projectName}` so that it can make changes to the source package.json. This is necessary in any of these scenarios:
 
 1. The repo follows a single version policy by placing all dependencies in the root package.json, rather than in each project's package.json. To deploy or publish packages, a new package.json that includes the projects dependencies needs to be generated.
-2. The package.json contains references to source files for an improved developer experience. For example, we recommend the `types` field points to a source file rather than a generated .dts file (so intellisense is always using the latest types without needing a potentially slow re-compile). When publishing types is removed
+2. The package.json contains references to source files for an improved developer experience. For example, we recommend the `types` field points to a source file rather than a generated .dts file (so intellisense is always using the latest types without needing a potentially slow re-compile). When the package is published, `.d.ts` files are created and the `types` field is removed from package.json.
 3. Generating a ESM/CJS compatible packages.
 
 ## Principles
@@ -97,22 +97,22 @@ This plugin aims to achieve a predictable and cohesive development experience by
 - Watch mode
 - Accept option to specify what to do with non-publishable dependencies – error, skip, build subpackage, look for built modules in some search paths
 - Provide package.json#exports [fallback strategies](https://github.com/andrewbranch/example-subpath-exports-ts-compat)
-- Warn if subpackage executor has different target runtime to parent package
+- Warn if sub-package executor has different target runtime to parent package
 - Tame coupling between cache config and project name
 - Scope approach for working with package-based repos e.g. lerna and pnpm (no source code analysis, no generated package.json, publishable bundle in package folder)
 - Add `module` exports condition for bundlers e.g. webpack, [esbuild](https://esbuild.github.io/api/#how-conditions-work)
-- Expolore issues around inherited baseUrl/paths and potentially using project references to solve
+- Explore issues around inherited baseUrl/paths and potentially using project references to solve
 - Fully leverage tsconfig incremental compilation
 
 Feel free to open an issue to bump any of these points.
 
 ## Contributing
 
-Contributions and feedback are welcome! Todo: write some contibution guidelines. When proposing new features, keep in mind the design (principles)[#principles].
+Contributions and feedback are welcome! Todo: write some contribution guidelines. When proposing new features, keep in mind the design (principles)[#principles].
 
 ## Contributors
 
-- Daniel Grant [@dgrant\_](https://twitter.com/djgrant_)
+- Daniel Grant [@djgrant\_](https://twitter.com/djgrant_)
 
 ## Licence
 

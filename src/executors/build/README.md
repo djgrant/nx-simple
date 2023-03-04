@@ -108,7 +108,7 @@ The executor also reads configuration from these files:
 | `package.json`  | `main`                    | yes                      | the location of the compiled entry point                              |
 | `package.json`  | `types`                   | if lib                   | the location of the source entry point                                |
 | `package.json`  | `exports`                 | if multiple entry points | a map of entry points                                                 |
-| `.swcrc`        | `{}`                      | no                       | swc configraution, which may be partially overwritten by the executor |
+| `.swcrc`        | `{}`                      | no                       | swc configuration, which may be partially overwritten by the executor |
 
 ## Workspace Configuration
 

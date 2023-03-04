@@ -144,13 +144,13 @@ Compiles and packages TypeScript projects for publication to NPM, deployment as 
 
 ## Executor Options
 
-| Param           | Type                         | Description                                                     | Default    |
-| --------------- | ---------------------------- | --------------------------------------------------------------- | ---------- |
-| `distribution`  | `"npm"`                      | creates a distribution that can be published to NPM             | required   |
-| `distribution`  | `"app"`                      | creates a distributon that can be installed                     | required   |
-| `distribution`  | `"lib"`                      | creates a subpackage that can be copied to another distribution | required   |
-|                 |                              |                                                                 |            |
-| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | the target JavaScript environment                               | `"es2020"` |
+| Param           | Type                         | Description                                                      | Default    |
+| --------------- | ---------------------------- | ---------------------------------------------------------------- | ---------- |
+| `distribution`  | `"npm"`                      | creates a distribution that can be published to NPM              | required   |
+| `distribution`  | `"app"`                      | creates a distribution that can be installed                     | required   |
+| `distribution`  | `"lib"`                      | creates a sub-package that can be copied to another distribution | required   |
+|                 |                              |                                                                  |            |
+| `targetRuntime` | `"es5" \| "es6" \| "esYYYY"` | the target JavaScript environment                                | `"es2020"` |
 
 Notes:
 
@@ -159,7 +159,7 @@ Notes:
    1. the package executor, also configured with `"distribution": "npm"`
    1. a `publish` target, configured with any executor
    1. `"willPublish": true` set at the root level
-1. Non-publishable subpackage that are dependencies of publishable packages should have a package executor configured with `"distribution": "lib"`
+1. Non-publishable sub-package that are dependencies of publishable packages should have a package executor configured with `"distribution": "lib"`
 
 ## Project Configuration
 
@@ -168,7 +168,7 @@ The executor also reads configuration from these files:
 | File            | Param                     | Required | Description                                                                                 |
 | --------------- | ------------------------- | -------- | ------------------------------------------------------------------------------------------- |
 | `tsconfig.json` | `compilerOptions.baseUrl` | yes      | the directory containing source code (within project directory)                             |
-| `.swcrc`        | `{}`                      | no       | swc configraution, which may be partially [overwritten](../../utils/swc.ts) by the executor |
+| `.swcrc`        | `{}`                      | no       | swc configuration, which may be partially [overwritten](../../utils/swc.ts) by the executor |
 
 ## Workspace Configuration
 
