@@ -66,7 +66,7 @@ export async function createPackageJson(opts: Opts) {
   // 4. Resolve dependencies
   packageJson.dependencies = {};
 
-  const isPeerDep = (v: string) => (Object.keys(peerDeps) || {}).includes(v);
+  const isPeerDep = (v: string) => Object.keys(peerDeps || {}).includes(v);
 
   if (opts.publishedDependencies) {
     for (const dep of opts.publishedDependencies) {
