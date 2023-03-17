@@ -14,12 +14,14 @@ const distToDistCjsRe = [/^(\.\/)?dist\//, "./dist-cjs/"];
 
 export async function createPackageJson(opts: Opts) {
   const packageJson = { ...opts.sourcePackageJson };
+  const peerDeps = packageJson.peerDependencies;
   const exportMap: Record<string, { import: string; require: string }> = {};
 
   // 1. Strip fields
   delete packageJson.type; // defined in dist directories
   delete packageJson.types; // types are resolved by adjacent .d.ts
   delete packageJson.devDependencies; // non-prod field
+  delete packageJson.peerDependencies; // added back, in nice order, after other fields are added
 
   // 2. Remap main field
   if (packageJson.main) {
@@ -64,8 +66,7 @@ export async function createPackageJson(opts: Opts) {
   // 4. Resolve dependencies
   packageJson.dependencies = {};
 
-  const isPeerDep = (v: string) =>
-    (Object.keys(packageJson.peerDependencies) || {}).includes(v);
+  const isPeerDep = (v: string) => (Object.keys(peerDeps) || {}).includes(v);
 
   if (opts.publishedDependencies) {
     for (const dep of opts.publishedDependencies) {
@@ -74,6 +75,11 @@ export async function createPackageJson(opts: Opts) {
         packageJson.dependencies[packageName] = getVersion(dep) || "latest";
       }
     }
+  }
+
+  // 5. Add peer deps back in aesthetic order
+  if (peerDeps) {
+    packageJson.peerDependencies = peerDeps;
   }
 
   return packageJson;
